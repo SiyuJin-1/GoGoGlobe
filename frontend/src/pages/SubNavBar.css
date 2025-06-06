@@ -1,0 +1,38 @@
+.subnav-divider {
+  margin: 0;
+  border: none;
+  height: 1px;
+  background-color: #eee;
+}
+
+/* 顶部标签栏 */
+.top-nav-bar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.8rem 2rem;
+  background-color: #fff;
+  border-bottom: 1px solid #f3f3f3;
+}
+
+/* 标签按钮 */
+.nav-tab {
+  text-decoration: none;
+  color: #333;
+  font-size: 0.95rem;
+  padding: 0.5rem 1.2rem;
+  background-color: #f3f3f3;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.nav-tab:hover {
+  background-color: #e0e0e0;
+}
+
+.nav-tab.active {
+  background-color: #ffe6ea;
+  color: #d72638;
+  font-weight: bold;
+  box-shadow: 0 2px 6px rgba(255, 0, 72, 0.15);
+}

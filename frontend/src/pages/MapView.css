@@ -1,0 +1,31 @@
+/* 保证搜索框显示在顶层 */
+/* 缩小搜索按钮的尺寸 */
+/* .leaflet-control-geocoder {
+  font-size: 12px !important;
+  line-height: 1.2 !important;
+  width: auto !important;
+} */
+
+/* .leaflet-control-geocoder-icon {
+  transform: scale(0.8);
+}
+
+.leaflet-control-geocoder-form {
+  width: 180px !important;
+} */
+
+
+/* 保证地图容器没有 overflow 隐藏掉搜索框 */
+/* .map-container,
+.leaflet-container {
+  overflow: visible !important;
+} */
+
+
+/* 模拟弹窗容器样式 */
+
+/* 可选：Geocoder 文字输入框样式微调 */
+/* .leaflet-control-geocoder-form input {
+  font-size: 1rem;
+  padding: 0.4rem;
+} */

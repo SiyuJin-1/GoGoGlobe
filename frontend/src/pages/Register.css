@@ -1,0 +1,96 @@
+/* Register.css */
+.register-wrapper {
+  background-image: url('/public/images/login_bg.png');
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center -250px;  /* 👈 显示图像顶部 */
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;         /* 👉 水平居中卡片 */
+  align-items: flex-start;         /* 👉 让内容从上方开始 */
+  padding-top: 10vh;                /* 👈 控制整体往下 */
+  padding-left: 55vw;              /* 👉 如果要往右偏移可以调这个 */
+}
+
+.register-card {
+  background: white;
+  padding: 2.5rem;
+  border-radius: 12px;
+  width: 380px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+
+.register-card h1 {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.register-card p {
+  color: #666;
+  margin-bottom: 1.5rem;
+}
+
+.register-card form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.register-card input {
+  padding: 0.8rem;
+  border-radius: 6px;
+  border: 1px solid #000000;
+  font-size: 1rem;
+}
+
+.register-card button {
+  background-color: #f96854;
+  color: white;
+  padding: 0.8rem;
+  font-size: 1rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.register-card button:hover {
+  background-color: #f4511e;
+}
+
+.message {
+  margin-top: 1rem;
+  color: #d32f2f;
+  font-weight: bold;
+}
+
+.divider {
+  margin-top: 1rem;
+  color: #999;
+}
+
+.login-link {
+  margin-top: 0.5rem;
+  display: inline-block;
+  color: #42a5f5;
+  text-decoration: none;
+}
+
+.google-login {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.google-login:hover {
+  background-color: #f5f5f5;
+}
+
+.google-icon {
+  width: 150px;
+  height: 30px;
+}
+
+

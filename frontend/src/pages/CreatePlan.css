@@ -1,0 +1,101 @@
+
+.create-plan-container {
+  background-image: url('/public/images/Create_bg.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.create-plan-container h1 {
+  font-size: 2.8rem;
+  font-weight: 600;
+  color: #333;
+  white-space: nowrap;
+  
+}
+
+.create-form {
+  margin-top: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.form-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  max-width: 500px;
+}
+
+.form-row > label {
+  display: flex;
+  width: 140px; /* 固定 label 宽度，使输入框对齐 */
+  font-size: 1.1rem;
+  text-align: right;
+  margin-right: 1rem;
+}
+
+.radio-group {
+  display: flex;
+  flex-direction: column; /* 或 row 如果你想水平 */
+  gap: 0.3rem;
+  font-size: 1rem;
+  align-items: flex-start;
+}
+
+
+.radio-group label {
+  gap: 0.5rem;
+  display: flex;
+  font-size: 1rem;
+  margin-right: 1rem;
+  white-space: nowrap;
+}
+
+.form-row input {
+  flex: 1;
+  padding: 0.6rem 1rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  width: 100%;
+  max-width: 300px;
+}
+
+
+.create-form button {
+  margin-top: 1.5rem;
+  padding: 0.8rem 1.5rem;
+  font-size: 1rem;
+  background-color: #f03d6b;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  width: 100%;
+  max-width: 300px; /* 与输入框保持一致 */
+  transition: background-color 0.3s ease;
+}
+
+.create-form button:hover {
+  background-color: #d83760;
+}
+
+.text-wrapper {
+  background-color: rgba(255, 255, 255, 0.6);
+  border-radius: 20px;
+  padding: 2rem 3rem;
+  display: inline-block;
+  margin: 2rem auto 4rem auto;
+  height: auto;
+  margin-top: 5rem;
+}

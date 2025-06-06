@@ -1,0 +1,206 @@
+/* 🌄 背景样式 */
+.app-container {
+  background-image: url('/public/images/AI_bg.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  padding: 2rem;
+  text-align: center;
+  min-height: 100vh;
+}
+
+/* 标题与基础排版 */
+h1 {
+  font-size: 3rem;
+  font-weight: 600;
+  font-family: 'Helvetica Neue', 'Segoe UI', sans-serif;
+  margin-bottom: 2rem;
+  color: #2d3436;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+p {
+  font-size: 1.2rem;
+  color: #333;
+  margin-bottom: 2rem;
+  line-height: 1.6;
+}
+
+/* 下拉菜单 & 按钮 */
+select {
+  padding: 0.7rem 1.2rem;
+  font-size: 1rem;
+  border-radius: 12px;
+  border: 1px solid #ccc;
+  margin: 0 1rem;
+  background-color: white;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+select:focus {
+  border-color: #ff4b2b;
+  outline: none;
+}
+
+button {
+  padding: 0.75rem 1.8rem;
+  font-size: 1rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 12px;
+  color: white;
+  background: linear-gradient(135deg, #ff416c, #ff4b2b);
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+}
+
+/* 🧾 Markdown输出（左侧） */
+.markdown-detail {
+  background: rgba(255, 255, 255, 0.78);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  padding: 2rem;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  color: #333;
+  overflow-y: auto;
+  max-height: 80vh;
+  flex: 1;
+  max-width: 100%;
+  text-align: left;
+  font-size: 1rem;
+  line-height: 1.8;
+}
+
+/* Markdown 渲染标题与内容排版 */
+.markdown-detail h1,
+.markdown-detail h2,
+.markdown-detail h3 {
+  font-weight: 700;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  color: #222;
+  font-size: 1.3rem;
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 0.5rem;
+}
+
+.markdown-detail p {
+  margin-bottom: 1.2rem;
+}
+
+.markdown-detail ul {
+  padding-left: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.markdown-detail li {
+  margin-bottom: 0.5rem;
+}
+
+.markdown-detail strong {
+  font-weight: 600;
+  color: #000;
+}
+
+/* 📑 右侧卡片行程视图 */
+.plan-layout {
+  display: flex;
+  gap: 2rem;
+  margin-top: 2rem;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.sidebar-card-view {
+  flex: 1;
+  max-width: 100%;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(10px);
+  padding: 1rem;
+  border-radius: 16px;
+  overflow-y: auto;
+  max-height: 80vh;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.card-schedule-wrapper {
+  padding: 1rem;
+}
+
+.day-block {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.day-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #2c3e50;
+  margin-bottom: 0.8rem;
+  padding-bottom: 0.5rem;
+  letter-spacing: 0.03em;
+  text-align: left;
+  border-bottom: 2px solid #d1cfcf;
+}
+
+.schedule-item-card {
+  display: flex;
+  background: #f9f9f9;
+  border-left: 4px solid #ff5a5f;
+  padding: 0.8rem 1rem;
+  margin-bottom: 0.6rem;
+  border-radius: 8px;
+}
+
+.item-time {
+  font-weight: bold;
+  width: 80px;
+  color: #ff5a5f;
+}
+
+.item-details {
+  flex: 1;
+}
+
+.item-title {
+  font-weight: bold;
+  font-size: 1rem;
+  margin-bottom: 0.2rem;
+}
+
+.item-desc {
+  color: #555;
+  font-size: 0.9rem;
+}
+
+.item-duration {
+  font-size: 0.85rem;
+  color: #888;
+}
+
+.apply-btn {
+  display: block;
+  margin: 1rem auto;         /* 水平居中 + 上下留白 */
+  padding: 0.75rem 2rem;
+  font-size: 1rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 12px;
+  color: white;
+  background: linear-gradient(135deg, #ff416c, #ff4b2b);
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+}
+
+.apply-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}

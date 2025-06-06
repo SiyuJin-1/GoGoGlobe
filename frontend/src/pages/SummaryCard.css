@@ -1,0 +1,104 @@
+.summary-wrapper {
+  padding: 1rem;
+}
+
+.summary-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+}
+
+.summary-card {
+  position: relative;  /* 关键：让 summary-actions 定位有参照 */
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 1.5rem;
+  border-radius: 1.5rem;
+  background-color: #fff7f0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  margin-bottom: 1.5rem;
+  width: 600px;
+  min-height: 160px;
+}
+
+
+
+
+.summary-card:hover {
+  transform: translateY(-3px);
+}
+
+.summary-left {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.summary-route {
+  font-weight: bold;
+  font-size: 1.2rem;
+  color: #333;
+}
+
+.summary-dates,
+.summary-count {
+  color: #666;
+  font-size: 0.95rem;
+}
+
+.summary-right {
+  flex-shrink: 0;
+  margin-left: 0.5rem;
+  width: 200px;
+  
+  position: relative;  /* ✅ 关键：让按钮绝对定位在这个容器内 */
+  display: flex;
+  flex-direction: column;
+  align-items: center; 
+  gap: 0.5rem;
+}
+
+.summary-cover {
+  width: 140px;
+  height: 90px;
+  object-fit: cover;
+  border-radius: 0.75rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.delete-btn {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  border: none;
+  background: none;
+  font-size: 22px;
+  cursor: pointer;
+  padding: 4px;
+  color: #666;
+}
+
+.delete-btn:hover {
+  color: #000;
+}
+
+.edit-btn {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: #ef7c8e;
+  border: none;
+  padding: 2px 8px;
+  border-radius: 10px;
+
+  font-size: 14px;
+  font-weight: 600;
+  color: white;
+  /* cursor: pointer; */
+  /* box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  transition: background-color 0.2s ease; */
+}
+
+

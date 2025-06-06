@@ -1,0 +1,95 @@
+/* src/pages/Home.css */
+
+.home-container {
+  background-image: url('/public/images/Home_bg.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  min-height: 100vh;
+  width: 100%;
+}
+
+
+.main-content {
+  display: flex;
+  margin-left: -18rem; 
+  justify-content: center;
+  align-items: center;
+  padding: 3rem 6rem;
+  min-height: 90vh; /* 控制垂直高度 */
+}
+
+
+.left-panel {
+  max-width: 500px;
+  width: 100%;
+}
+
+.left-panel h1 {
+  font-size: 2.8rem;
+  font-weight: 700;
+  color: #333;
+  white-space: nowrap;
+}
+
+.highlight {
+  color: #f03d6b; /* 比纯红更柔和 */
+  font-weight: 600;
+  width: 100%;
+}
+
+
+.left-panel h2 {
+  font-size: 1.5rem;
+  margin-top: 1rem;
+  font-weight: 600;
+  margin-left: 10rem; 
+  width: 100%;
+}
+
+.button-row {
+  display: flex;
+  justify-content: center;
+  gap: 5rem; /* 按钮之间的间距 */
+  margin-top: 2rem;
+}
+
+.primary-btn, .secondary-btn {
+  padding: 0.8rem 1.5rem;
+  font-size: 1rem;
+  background-color: #f03d6b;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.primary-btn:hover,
+.secondary-btn:hover {
+  background-color: #d73762;
+}
+
+
+.left-panel button:hover {
+  background-color: rgba(255, 64, 129, 1);
+}
+
+.features {
+  margin-top: 2rem;
+  list-style: none;
+  padding-left: 0;
+}
+
+.features li {
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+}
+
+.text-wrapper {
+  background-color: rgba(255, 255, 255, 0.6);
+  border-radius: 20px;
+  padding: 2rem 3rem;
+  display: inline-block;
+}
