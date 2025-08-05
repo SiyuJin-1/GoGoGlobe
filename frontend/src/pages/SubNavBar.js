@@ -4,6 +4,7 @@ import './SubNavBar.css';
 
 function SubNavBar() {
   const location = useLocation();
+  const userId = localStorage.getItem("userId");  // ✅ 从 localStorage 读取用户 ID
 
   return (
     <>
@@ -15,17 +16,29 @@ function SubNavBar() {
         <Link to="/itinerary" className={`nav-tab ${location.pathname === '/itinerary' ? 'active' : ''}`}>
           📅 My Itinerary
         </Link>
-        <Link to="/accommodation" className={`nav-tab ${location.pathname === '/accommodation' ? 'active' : ''}`}>
+        <Link
+          to={userId ? `/accommodation/${userId}` : "#"}  // ✅ 拼接用户ID
+          className={`nav-tab ${location.pathname === `/accommodation/${userId}` ? 'active' : ''}`}
+        >
           🛏️ Accommodation
         </Link>
-        <Link to="/packing" className={`nav-tab ${location.pathname === '/packing' ? 'active' : ''}`}>
+        <Link
+          to={userId ? `/packing/${userId}` : "#"}  // ✅ 拼接用户ID
+          className={`nav-tab ${location.pathname === `/packing/${userId}` ? 'active' : ''}`}
+        >
           🧾 Packing List
         </Link>
-        <Link to="/members" className={`nav-tab ${location.pathname === '/members' ? 'active' : ''}`}>
+        <Link
+          to={userId ? `/members/${userId}` : "#"}  // ✅ 拼接用户ID
+          className={`nav-tab ${location.pathname === `/members/${userId}` ? 'active' : ''}`}
+        >
           🧑‍🤝‍🧑 Members
         </Link>
-        <Link to="/budget" className={`nav-tab ${location.pathname === '/budget' ? 'active' : ''}`}>
-          💰 Budget
+        <Link
+          to={userId ? `/splitwise/${userId}` : "#"}  // ✅ 拼接用户ID
+          className={`nav-tab ${location.pathname === `/splitwise/${userId}` ? 'active' : ''}`}
+        >
+          💰 Splitwise
         </Link>
       </div>
     </>

@@ -1,0 +1,92 @@
+.packing-group-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 1.2rem 1.4rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  margin-bottom: 24px;
+  width: 100%;
+}
+
+.group-title {
+  font-weight: 600;
+  font-size: 16px;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  color: #333;
+}
+
+.count {
+  font-size: 14px;
+  color: #999;
+}
+
+.packing-item-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.packing-item {
+  display: flex;
+  align-items: center;
+  padding: 8px 0;
+  gap: 10px;
+}
+
+.packing-item input[type="checkbox"] {
+  transform: scale(1.2);
+  accent-color: #ff5d73;
+}
+
+.item-name {
+  flex: 1;
+  font-size: 15px;
+}
+
+.item-name.checked {
+  text-decoration: line-through;
+  color: #bbb;
+}
+
+.edit-btn,
+.delete-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  color: #999;
+  transition: color 0.2s;
+}
+
+.edit-btn:hover,
+.delete-btn:hover {
+  color: #ff5d73;
+}
+
+.add-new-item {
+  margin-top: 12px;
+  display: flex;
+  gap: 8px;
+}
+
+.add-new-item input {
+  flex: 1;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+}
+
+.add-new-item button {
+  background-color: #ff5d73;
+  color: white;
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: none;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.add-new-item button:hover {
+  background-color: #e8425f;
+}

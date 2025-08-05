@@ -9,7 +9,10 @@ import MyItinerary from './pages/MyItinerary';
 import SummaryCard from './pages/SummaryCard';
 import './App.css'; // 引入全局样式
 import PlanSummary from './pages/PlanSummary';
-
+import PackList from './pages/PackList';
+import Member from './pages/Member';
+import Accommodation from './pages/Accommodation';
+import Splitwise from './pages/Splitwise';
 
 
 function App() {
@@ -24,6 +27,11 @@ function App() {
         {/* <Route path="/manualplan" element={<ManualPlan />} /> */}
         <Route path="/my-itinerary" element={<MyItinerary />} />
         <Route path="/plan-summary/:id" element={<PlanSummary />} />
+        <Route path="/packing/:id" element={<PackList />} />
+        <Route path="/members/:id" element={<Member />} />
+        {/* <Route path="/budget" element={<PlanSummary />} /> */}
+        <Route path="/accommodation/:id" element={<Accommodation />} />
+        <Route path="/splitwise/:id" element={<Splitwise />} />
 
         <Route path="/summary-card" element={<SummaryCard />} />
         <Route path="/itinerary" element={<MyItinerary />} />

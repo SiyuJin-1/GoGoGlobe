@@ -1,0 +1,193 @@
+/* 整体页面布局 */
+.accommodation-page {
+  padding: 2rem;
+  background-color: #f8f9fb;
+  min-height: 100vh;
+  
+}
+
+/* 行程下拉选择器区域 */
+.trip-selector-global {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  justify-content: center;
+  margin-bottom: 2rem;
+}
+
+.trip-selector-global label {
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.trip-selector-global select {
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  background-color: white;
+}
+
+/* 左右两列布局 */
+.accommodation-columns {
+  display: flex;
+  gap: 2rem;
+  align-items: flex-start;
+}
+
+/* 左边时间轴列 */
+.timeline-column {
+  flex: 1;
+}
+
+.timeline-column h3 {
+  margin-bottom: 1.2rem;
+  font-size: 1.3rem;
+  font-weight: bold;
+  color: #333;
+}
+
+/* 右边表单列 */
+.form-column {
+  flex: 1;
+  background-color: white;
+  padding: 2rem;
+  border-radius: 16px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+}
+
+/* 🏨 每个住宿卡片 */
+.accommodation-card {
+  position: relative;
+  background: #fff;
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+}
+
+/* 🕒 时间标签在左上角 */
+.date-label {
+  position: absolute;
+  top: 1rem;
+  left: 1.5rem;
+  font-size: 1.05rem;
+  font-weight: bold;
+  color: #5c6b84;
+}
+
+/* 图片样式 */
+.thumbnail {
+  width: 110px;
+  height: 90px;
+  object-fit: cover;
+  border-radius: 8px;
+  flex-shrink: 0;
+  margin-top: 1.5rem;
+  /* background: lightblue; */
+  margin-right: 2rem;
+}
+
+/* 信息文本块 */
+.card-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.3rem;
+  margin-top: 1.5rem;
+  padding: 0 2rem;
+  /* background: lightpink; */
+}
+
+.card-info h4 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #222;
+}
+
+.card-info p {
+  margin: 0;
+  font-size: 1rem;
+  color: #555;
+}
+
+/* 链接样式 */
+.card-info a {
+  display: inline-block;
+  color: #007bff;
+  font-size: 0.95rem;
+  margin-top: 0.25rem;
+  text-decoration: none;
+}
+
+.card-info a:hover {
+  text-decoration: underline;
+}
+
+/* 表单元素统一样式 */
+.form-column input,
+.form-column textarea,
+.form-column select {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  box-sizing: border-box;
+}
+
+.form-column label {
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+  display: block;
+  color: #444;
+}
+
+.form-column button {
+  padding: 0.6rem 1.2rem;
+  border: none;
+  color: white;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background 0.3s;
+}
+
+.form-column button:hover {
+  opacity: 0.9;
+}
+
+/* 📱 小屏幕适配 */
+@media (max-width: 768px) {
+  .accommodation-columns {
+    flex-direction: column;
+  }
+
+  .timeline-column,
+  .form-column {
+    width: 100%;
+  }
+
+  .accommodation-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .thumbnail {
+    width: 100%;
+    height: auto;
+    margin-top: 0.5rem;
+  }
+
+  .date-label {
+    position: static;
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+  }
+}

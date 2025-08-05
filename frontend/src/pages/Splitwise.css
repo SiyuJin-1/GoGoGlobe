@@ -1,0 +1,128 @@
+.user-finance-entry {
+  display: flex;
+  justify-content: space-between;
+  margin: 0.3rem 0;
+  border-top: 1px solid #ccc;
+}
+
+.user-balance-block {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #ccc; /* ✅ 加粗分割线 */
+}
+
+.no-payment {
+  color: #888;
+  margin-left: 1rem;
+}
+
+.balance-line {
+  color: #333;
+}
+
+.avg-spending-separator {
+  margin: 1.5rem 0;
+  border-top: 3px solid #888; /* ✅ 加粗实线分隔 */
+}
+
+.user-personal-summary {
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 3px solid #aaa; /* ✅ 你账单上方加粗实线 */
+}
+
+.balance-line {
+  display: flex;
+  justify-content: space-between; /* ✅ 让钱靠右 */
+  margin-left: 1.5rem;
+  margin-right: 0.5rem;
+  margin-bottom: 0.3rem;
+  font-weight: bold;
+  align-items: center;
+  gap: 1rem;
+}
+
+.balance-line span:first-child {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.balance-line span:last-child {
+  font-weight: bold;
+  font-family: monospace;
+  margin-left: auto;
+  text-align: right;
+  min-width: 4rem;
+}
+
+/* 保留原样式 */
+.splitwise-grid {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 2rem;
+  padding: 2rem;
+}
+
+.trip-selector.center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 2rem;
+  gap: 0.75rem;
+}
+
+.trip-selector select {
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.splitwise-card {
+  background-color: #fff7f0;
+  padding: 1.5rem;
+  border-radius: 16px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.splitwise-card.left h4 {
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+}
+
+.splitwise-card.right {
+  display: flex;
+  flex-direction: column;
+}
+
+.budget-item {
+  display: grid;
+  grid-template-columns: 2fr 1fr 2fr;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.budget-item input,
+.budget-item select {
+  padding: 0.5rem 0.75rem;
+  font-size: 1rem;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  width: 100%;
+}
+
+.add-btn {
+  align-self: flex-end;
+  background: linear-gradient(to right, #ff416c, #ff4b2b);
+  color: white;
+  font-weight: bold;
+  font-size: 1rem;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  margin-top: 1.5rem;
+}

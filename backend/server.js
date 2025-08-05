@@ -35,6 +35,7 @@ app.use(session({
 // 🧠 启用 passport
 app.use(passport.initialize());
 app.use(passport.session());
+app.use("/uploads", express.static("uploads")); // 图片可访问
 
 // ✅ 接入 plan 接口
 console.log("About to load plan routes...");
@@ -51,6 +52,18 @@ console.log("About to load trip routes...");
 const tripRoutes = require('./routes/trip');
 app.use('/api/trip', tripRoutes);
 console.log("Trip routes loaded successfully");
+
+const memberRoutes = require('./routes/member');
+app.use("/api/members", memberRoutes);
+console.log("Members routes loaded successfully");
+
+const accommodationRoutes = require('./routes/accommodation');
+app.use("/api/accommodations", accommodationRoutes);
+console.log("Accommodation routes loaded successfully");
+
+const expensesRoutes = require("./routes/expenses");
+app.use("/api/expenses", expensesRoutes);
+console.log("Expenses routes loaded successfully");
 
 // ✅ 基础测试接口
 // console.log("About to load AI routes...");

@@ -1,0 +1,170 @@
+.packing-page {
+  padding: 2rem;
+  background-color: #f5f7fa;
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* 让卡片居中 */
+}
+
+.packing-card {
+  background-color: #fffaf6;
+  border-radius: 16px;
+  padding: 2rem;
+  margin-top: 2rem;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  width: 90%;
+  max-width: 1000px; /* ⭐️ 控制最大宽度 */
+  transition: transform 0.2s ease;
+}
+
+.packing-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.packing-header h3 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.packing-date {
+  font-size: 14px;
+  color: #777;
+  margin-bottom: 1rem;
+}
+
+.packing-item {
+  display: grid;
+  grid-template-columns: 1fr 130px 130px; /* 三列：勾选+名称、成员标签、下拉菜单 */
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  padding: 4px 0;
+}
+
+
+.item-name {
+  flex: 1;
+  font-size: 16px;
+}
+
+.assigned-label {
+  background-color: #f1f1f1;
+  border-radius: 8px;
+  padding: 4px 8px;
+  font-size: 13px;
+  color: #555;
+  white-space: nowrap;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.assigned-select {
+  font-size: 13px;
+  padding: 4px 6px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  background-color: white;
+  width: 120px; /* ⭐️ 控制宽度 */
+}
+
+
+.packing-items li {
+  display: flex;
+  align-items: center;
+  font-size: 16px;
+  margin-bottom: 8px;
+}
+
+.packing-items input[type="checkbox"] {
+  margin-right: 12px;
+  transform: scale(1.2);
+  accent-color: #ff5d73;
+}
+
+.packing-items span {
+  flex: 1;
+}
+
+.delete-item-btn {
+  background: none;
+  border: none;
+  color: #ccc;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.delete-item-btn:hover {
+  color: #ff5d73;
+}
+
+.add-item-section {
+  margin-top: 1rem;
+  display: flex;
+  gap: 8px;
+}
+
+.add-item-section input {
+  flex: 1;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+}
+
+.add-item-section button {
+  background-color: #ff9ca8;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 14px;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.add-item-section button:hover {
+  background-color: #ff6e80;
+}
+
+.packing-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.assigned-label {
+  font-size: 13px;
+  background-color: #f1f1f1;
+  padding: 2px 6px;
+  border-radius: 6px;
+  color: #666;
+}
+
+.assigned-select {
+  padding: 4px 6px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  background: white;
+  font-size: 13px;
+}
+
+.trip-selector {
+  margin: 1rem 2rem;
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.trip-selector select {
+  padding: 4px 8px;
+  font-size: 1rem;
+}
+
+.trip-selector tripSelect {
+  font-weight: bold;
+  font-size: 1rem;
+}

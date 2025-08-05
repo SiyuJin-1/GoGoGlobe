@@ -5,24 +5,28 @@ const router = express.Router();
 const {
   saveTrip,
   getTripsByUser,
-  deleteTrip, // ✅ 添加删除函数
-  updateTrip, // ✅ 添加更新函数
-  getTripById, // ✅ 添加获取单个行程函数
+  deleteTrip,
+  updateTrip,
+  getTripById,
+  addItemToTrip, // ✅ 添加新控制器函数
+  clearItemsFromTrip,
+  updateItem
 } = require("../controllers/trip.controller");
 
-// 保存新的计划
 router.post("/", (req, res, next) => {
   console.log("📨 POST /api/trip reached");
   next();
 }, saveTrip);
 
-// 获取当前用户的所有计划
+// ✅ 新增：添加物品到 trip 的 items 中
+router.put("/item/:itemId", updateItem);
+router.post("/:id/add-item",  addItemToTrip);
+router.delete("/:id/clear-items", clearItemsFromTrip);
 router.get("/user/:userId", getTripsByUser);
-
-// ✅ 删除计划
 router.delete("/:id", deleteTrip);
-
-router.put("/:id", updateTrip); 
-
+router.put("/:id", updateTrip);
 router.get("/:id", getTripById);
+
+
+
 module.exports = router;

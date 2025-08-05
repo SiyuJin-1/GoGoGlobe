@@ -1,0 +1,7 @@
+.accommodation-title {
+  font-size: 2rem;              /* 放大字体 */
+  text-align: center;           /* 居中对齐 */
+  margin-bottom: 2rem;          /* 与下方内容拉开距离 */
+  font-weight: bold;
+  color: #333;
+}
