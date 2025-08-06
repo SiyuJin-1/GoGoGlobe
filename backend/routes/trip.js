@@ -1,6 +1,7 @@
 console.log("✅ trip routes loaded");
 
 const express = require("express");
+
 const router = express.Router();
 const {
   saveTrip,

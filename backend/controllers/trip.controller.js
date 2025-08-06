@@ -2,7 +2,10 @@ console.log("✅ trip.controller.js 加载了");
 
 const { PrismaClient } = require("../generated/prisma");
 const prisma = new PrismaClient();
+const redisClient = require("../utils/redisClient");
+const { sendToQueue } = require("../utils/rabbitmq");
 
+// ✅ 保存 Trip（创建后清除 Redis 缓存）
 exports.saveTrip = async (req, res) => {
   const { userId, fromCity, destination, startDate, endDate, schedule } = req.body;
 
@@ -10,14 +13,28 @@ exports.saveTrip = async (req, res) => {
     const newTrip = await prisma.trip.create({
       data: {
         userId: Number(userId),
-        fromCity,                      // ✅ 新增：出发城市
-        destination,                  // ✅ 新增：目的地
+        fromCity,
+        destination,
         startDate: new Date(startDate),
         endDate: new Date(endDate),
         schedule,
-        items: [], // 初始化 items 数组
+        items: [],
       },
     });
+
+    await redisClient.del(`user_trips_${userId}`);
+    console.log(`🧹 清除缓存: user_trips_${userId}`);
+
+    // ✅✅✅ 新增：发送通知消息
+    const msg = {
+      type: "trip_created",
+      userId: Number(userId),
+      tripId: newTrip.id,
+      message: `🧳 Trip "${newTrip.destination}" created!`,
+      timestamp: new Date().toISOString()
+    };
+    console.log("📤 发送通知消息:", msg);
+    await sendToQueue(msg);
 
     res.json(newTrip);
   } catch (err) {
@@ -26,62 +43,84 @@ exports.saveTrip = async (req, res) => {
   }
 };
 
+// ✅ 获取用户所有 Trip（带 Redis 缓存）
 exports.getTripsByUser = async (req, res) => {
   const { userId } = req.params;
   const uid = Number(userId);
+  const redisKey = `user_trips_${uid}`;
 
   try {
+    const cached = await redisClient.get(redisKey);
+    if (cached) {
+      console.log("⚡ Redis 缓存命中：user trips");
+      return res.json(JSON.parse(cached));
+    }
+
     const trips = await prisma.trip.findMany({
       where: {
         members: {
-          some: { userId: uid }, // 查询成员表里有该用户参与的所有 trip
+          some: { userId: uid },
         },
       },
       include: {
-        items: true,     // 包含 items
+        items: true,
         members: {
-          include: {
-            user: true,  // 包含成员信息（email、id等）
-          },
+          include: { user: true },
         },
       },
     });
 
+    await redisClient.set(redisKey, JSON.stringify(trips), { EX: 60 });
+    console.log("✅ Redis 缓存写入：user trips");
+
     res.json(trips);
   } catch (err) {
-    console.error("❌ Failed to fetch user trips:", err);
+    console.error("❌ 获取 trips 失败:", err);
     res.status(500).json({ message: "Failed to fetch trips", error: err.message });
   }
 };
 
-
+// ✅ 删除 Trip（先查 userId，再清除缓存）
 exports.deleteTrip = async (req, res) => {
   const { id } = req.params;
+
   try {
-    await prisma.trip.delete({
+    const trip = await prisma.trip.findUnique({
       where: { id: Number(id) },
     });
+
+    if (!trip) {
+      return res.status(404).json({ message: "Trip not found" });
+    }
+
+    await prisma.trip.delete({ where: { id: Number(id) } });
+    await redisClient.del(`user_trips_${trip.userId}`);
+    console.log(`🧹 清除缓存: user_trips_${trip.userId}`);
+
     res.json({ message: "Trip deleted" });
   } catch (err) {
     console.error("❌ 删除行程失败:", err);
     res.status(500).json({ error: "Failed to delete trip" });
   }
 };
+
+// ✅ 更新 Trip（更新后清除缓存 + 发通知）
 exports.updateTrip = async (req, res) => {
   const { id } = req.params;
   const {
-  userId,
-  fromCity,
-  destination,
-  startDate,
-  endDate,
-  schedule,
-  ...rest // 捕获并排除非法字段
-} = req.body;
+    userId,
+    fromCity,
+    destination,
+    startDate,
+    endDate,
+    schedule,
+    ...rest
+  } = req.body;
 
-if ("items" in rest) {
-  console.warn("⚠️ 已自动忽略非法字段 items");
-}
+  if ("items" in rest) {
+    console.warn("⚠️ 已自动忽略非法字段 items");
+  }
+
   try {
     const updatedTrip = await prisma.trip.update({
       where: { id: Number(id) },
@@ -95,6 +134,19 @@ if ("items" in rest) {
       },
     });
 
+    await redisClient.del(`user_trips_${userId}`);
+    console.log(`🧹 清除缓存: user_trips_${userId}`);
+
+    const msg = {
+      type: "trip_updated",
+      userId: Number(userId),
+      tripId: updatedTrip.id,
+      message: `✏️ Trip "${updatedTrip.destination}" was updated!`,
+      timestamp: new Date().toISOString()
+    };
+    console.log("📤 发送通知消息:", msg);
+    await sendToQueue(msg);
+
     res.json(updatedTrip);
   } catch (err) {
     console.error("❌ Failed to update trip:", err);
@@ -102,6 +154,7 @@ if ("items" in rest) {
   }
 };
 
+// ✅ 获取单个 Trip（保持原样）
 exports.getTripById = async (req, res) => {
   const { id } = req.params;
 
@@ -121,6 +174,7 @@ exports.getTripById = async (req, res) => {
   }
 };
 
+// ✅ 添加物品（加通知）
 exports.addItemToTrip = async (req, res) => {
   console.log("🚀 addItemToTrip controller 被调用！");
 
@@ -128,37 +182,47 @@ exports.addItemToTrip = async (req, res) => {
   const { name, packed, assignedTo } = req.body;
 
   try {
-    // 用 item.create 插入并关联到 trip
     const newItem = await prisma.item.create({
       data: {
         name,
         packed,
         assignedTo,
-        trip: { connect: { id: tripId } }, // 关联 trip
+        trip: { connect: { id: tripId } },
       },
     });
 
     console.log("✅ 添加物品成功:", newItem);
-    res.json({ item: newItem }); // ✅ 只返回这个新 item
+
+    // ✅✅✅ 如果有指派对象，发送通知
+    if (assignedTo) {
+      const user = await prisma.user.findFirst({ where: { email: assignedTo } });
+      if (user) {
+        const msg = {
+          type: "item_assigned",
+          userId: user.id,
+          tripId,
+          message: `🎒 You were assigned item "${name}" in trip ${tripId}`,
+          timestamp: new Date().toISOString()
+        };
+        console.log("📤 发送通知消息:", msg);
+        await sendToQueue(msg);
+      }
+    }
+
+    res.json({ item: newItem });
   } catch (err) {
     console.error("❌ 添加物品失败:", err);
     res.status(500).json({ error: err.message });
   }
 };
 
-
+// ✅ 清空物品（保持原样）
 exports.clearItemsFromTrip = async (req, res) => {
   const { id } = req.params;
 
   try {
-    // 删除所有 item
-    await prisma.item.deleteMany({
-      where: {
-        tripId: Number(id),
-      },
-    });
+    await prisma.item.deleteMany({ where: { tripId: Number(id) } });
 
-    // 返回最新 trip 数据（可选）
     const updatedTrip = await prisma.trip.findUnique({
       where: { id: Number(id) },
       include: { items: true },
@@ -172,11 +236,14 @@ exports.clearItemsFromTrip = async (req, res) => {
   }
 };
 
+// ✅ 更新物品（加通知）
 exports.updateItem = async (req, res) => {
   const { itemId } = req.params;
   const { packed, assignedTo } = req.body;
 
   try {
+    const prev = await prisma.item.findUnique({ where: { id: Number(itemId) } });
+
     const updated = await prisma.item.update({
       where: { id: Number(itemId) },
       data: {
@@ -185,11 +252,25 @@ exports.updateItem = async (req, res) => {
       },
     });
 
+    // ✅✅✅ 如果更换了指派人，通知新的人
+    if (assignedTo && assignedTo !== prev.assignedTo) {
+      const user = await prisma.user.findFirst({ where: { email: assignedTo } });
+      if (user) {
+        const msg = {
+          type: "item_assigned",
+          userId: user.id,
+          tripId: prev.tripId,
+          message: `You were reassigned item "${updated.name}" in trip ${prev.tripId}`,
+          timestamp: new Date().toISOString()
+        };
+        console.log("📤 发送通知消息:", msg);
+        await sendToQueue(msg);
+      }
+    }
+
     res.json({ message: "✅ 更新成功", item: updated });
   } catch (err) {
     console.error("❌ 更新物品失败:", err);
     res.status(500).json({ error: "更新失败", details: err.message });
   }
 };
-
-

@@ -13,6 +13,7 @@ import PackList from './pages/PackList';
 import Member from './pages/Member';
 import Accommodation from './pages/Accommodation';
 import Splitwise from './pages/Splitwise';
+import NotificationList from './pages/NotificationList';
 
 
 function App() {
@@ -29,6 +30,7 @@ function App() {
         <Route path="/plan-summary/:id" element={<PlanSummary />} />
         <Route path="/packing/:id" element={<PackList />} />
         <Route path="/members/:id" element={<Member />} />
+        <Route path="/notifications/:id" element={<NotificationList />} />
         {/* <Route path="/budget" element={<PlanSummary />} /> */}
         <Route path="/accommodation/:id" element={<Accommodation />} />
         <Route path="/splitwise/:id" element={<Splitwise />} />

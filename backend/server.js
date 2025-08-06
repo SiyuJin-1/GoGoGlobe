@@ -4,6 +4,8 @@ const dotenv = require("dotenv");
 const session = require("express-session");
 const passport = require("passport");
 const cookieParser = require('cookie-parser');
+const { connectRabbitMQ } = require("./utils/rabbitmq");
+connectRabbitMQ();
 
 require("./passport"); // 👈 加载 passport 设置
 
@@ -64,6 +66,11 @@ console.log("Accommodation routes loaded successfully");
 const expensesRoutes = require("./routes/expenses");
 app.use("/api/expenses", expensesRoutes);
 console.log("Expenses routes loaded successfully");
+
+const notificationRoutes = require("./routes/notificationRoutes");
+console.log("🚨 notificationRoutes 类型：", typeof notificationRoutes); // 👈 加这句
+app.use("/api/notification", notificationRoutes);
+
 
 // ✅ 基础测试接口
 // console.log("About to load AI routes...");
