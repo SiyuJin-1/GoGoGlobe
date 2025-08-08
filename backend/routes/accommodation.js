@@ -1,13 +1,13 @@
-const express = require("express");
-const router = express.Router();
-const controller = require("../controllers/accommodationController");
+// backend/routes/accommodations.js
+const router = require("express").Router();
+const ctrl = require("../controllers/accommodationController");
 
-router.post(
-  "/",
-  controller.uploadAccommodationImage, // 👈 先处理图片上传
-  controller.createAccommodation       // 👈 再保存数据
-);
+// 旧：router.post("/", ctrl.uploadAccommodationImage, ctrl.createAccommodation);
+// 新：
+router.post("/", ctrl.createAccommodation);
 
-router.get("/", controller.getAccommodationsByTrip);
-
+router.get("/", ctrl.getAccommodationsByTrip);
+router.patch("/:id", ctrl.updateAccommodation);   // ✅ 新增
+router.put("/:id", ctrl.updateAccommodation); 
+router.delete("/:id", ctrl.deleteAccommodation);
 module.exports = router;

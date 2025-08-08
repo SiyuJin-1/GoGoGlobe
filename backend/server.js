@@ -74,6 +74,10 @@ app.use("/api/notification", notificationRoutes);
 const photoRoutes = require("./routes/photo");
 app.use("/api/photo", photoRoutes);
 console.log("photo routes loaded successfully");
+
+const UploadRoutes = require("./routes/upload");
+app.use("/api/upload", UploadRoutes);
+
 // ✅ 基础测试接口
 // console.log("About to load AI routes...");
 // app.get("/", (req, res) => {

@@ -81,6 +81,7 @@ model Accommodation {
   checkIn     DateTime
   checkOut    DateTime
   imageUrl    String?
+  imageKey   String?
   bookingUrl  String?   @db.Text
 
   trip        Trip      @relation(fields: [tripId], references: [id])
@@ -119,7 +120,8 @@ model Photo {
   id          Int       @id @default(autoincrement())
   tripId      Int
   uploadedBy  Int
-  imageUrl    String
+  imageUrl    String?
+  imageKey    String?
   gps         String?
   dayIndex    Int
   placeName   String?
@@ -127,8 +129,9 @@ model Photo {
   visibility  String    @default("public")
   createdAt   DateTime  @default(now())
 
-  trip        Trip      @relation("TripPhotos", fields: [tripId], references: [id])
-  user        User      @relation("UserPhotos", fields: [uploadedBy], references: [id])
+  trip Trip @relation("TripPhotos", fields: [tripId], references: [id], onDelete: Cascade)
+  user User @relation("UserPhotos", fields: [uploadedBy], references: [id], onDelete: Cascade)
+
 
   likes       Like[]
   comments    Comment[]
@@ -136,7 +139,7 @@ model Photo {
 
 model Like {
   id        Int     @id @default(autoincrement())
-  photo     Photo   @relation(fields: [photoId], references: [id])
+  photo     Photo   @relation(fields: [photoId], references: [id], onDelete: Cascade)  // ⭐
   photoId   Int
 
   user      User    @relation(fields: [userId], references: [id])
@@ -149,7 +152,7 @@ model Like {
 
 model Comment {
   id        Int     @id @default(autoincrement())
-  photo     Photo   @relation(fields: [photoId], references: [id])
+  photo     Photo   @relation(fields: [photoId], references: [id], onDelete: Cascade)  // ⭐
   photoId   Int
 
   user      User    @relation(fields: [userId], references: [id])
@@ -158,6 +161,7 @@ model Comment {
   content   String
   createdAt DateTime @default(now())
 }
+
 
 model Notification {
   id        Int      @id @default(autoincrement())

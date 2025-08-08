@@ -1,252 +1,197 @@
+/* ===== 页面基础 ===== */
 .trip-photo-page {
-  padding: 2rem;
-  background-color: #f9fbfd;
-  min-height: 100vh;
+  padding: 24px;
 }
 
 .page-title {
-  font-size: 28px;
-  margin-bottom: 1.5rem;
-}
-.trip-dropdown-wrapper {
-  display: flex;
-  justify-content: center;
-  margin-top: 2rem;
-  margin-bottom: 2rem;
+  margin: 0 0 16px;
 }
 
-.trip-dropdown {
-  align-items: center;
-  margin-bottom: 1rem;
-}
-
-.trip-dropdown label {
-  font-weight: bold;
-  margin-right: 1rem;
-  font-size: 18px;
-}
-
-.trip-dropdown select {
-  padding: 0.5rem 1rem;
-  font-size: 16px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-}
-
+/* 顶部筛选行 */
 .filter-row {
   display: flex;
-  justify-content: center;
-  gap: 5rem; /* 两个下拉框间距 */
-  margin-top: 1rem;
-}
-
-.day-photo-wrapper {
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
-}
-
-/* 卡片整体 */
-.photo-card {
-  background-color: #ffffff;
-  border-radius: 16px;
-  padding: 1.5rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-}
-
-/* 左右结构 */
-.photo-card-content {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 2rem;
-}
-
-/* 左图部分 */
-.left-column {
-  flex: 1;
-}
-
-.day-title {
-  font-size: 22px;
-  margin-bottom: 1rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-/* 多图网格 */
-.photo-grid {
-  display: flex;
   flex-wrap: wrap;
-  gap: 1rem;
+  gap: 16px 24px;
+  align-items: center;
+  margin-bottom: 16px;
 }
 
+/* ===== 卡片布局：左图墙 + 右上传 ===== */
+.photo-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0,0,0,.06);
+  padding: 16px;
+}
+
+.photo-card-content {
+  display: grid;
+  grid-template-columns: 1fr 340px;   /* 左列自适应，右列固定宽 */
+  gap: 24px;
+}
+
+@media (max-width: 960px) {
+  .photo-card-content {
+    grid-template-columns: 1fr;       /* 小屏上下堆叠 */
+  }
+}
+
+/* ===== 左侧：照片网格 ===== */
+.day-title {
+  margin: 0 0 12px;
+}
+
+.photo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+/* 单元格固定比例，避免抖动 */
 .photo-item {
-  width: 150px;
-  text-align: center;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #f4f6f8;
+  cursor: pointer;
+  transition: transform .12s ease, box-shadow .12s ease;
 }
 
+.photo-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(0,0,0,.08);
+}
+
+/* 统一缩略图显示：裁剪铺满、固定比例 */
 .photo-item img {
+  display: block;
   width: 100%;
-  height: auto;
-  border-radius: 8px;
+  aspect-ratio: 4 / 3;     /* 没有这行就用 paddingTop 占位 */
   object-fit: cover;
 }
 
-/* 右上传部分 */
-.right-column {
-  min-width: 300px;
-  display: flex;
-  justify-content: flex-end;
+/* 下面的小标题 */
+.photo-item p {
+  margin: 6px 8px 8px;
+  font-size: 14px;
+  color: #333;
 }
 
-/* 上传卡片 */
-.upload-form-card {
-  background-color: #fdfdfd;
+/* ===== 右侧：上传表单 ===== */
+.right-column .upload-form-card {
+  position: sticky;
+  top: 12px;               /* 页面滚动时固定在视口内 */
+  background: #fafafa;
+  border: 1px solid #eee;
   border-radius: 12px;
-  padding: 1rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  width: 100%;
-  max-width: 320px;
+  padding: 16px;
 }
 
-.upload-form-card input[type="file"] {
-  font-size: 14px;
-}
-
-.upload-form-card input[type="text"] {
-  padding: 0.5rem;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  font-size: 14px;
-}
-
-.upload-form-card button {
-  padding: 0.6rem;
-  background: linear-gradient(to right, #ff416c, #ff4b2b);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: transform 0.2s ease;
-}
-
-.upload-form-card button:hover {
-  transform: translateY(-2px);
-}
-
+/* ===== 弹窗（Modal） ===== */
+/* 遮罩：全屏居中 */
 .modal {
   position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 1000;
-  width: 100vw;
-  height: 100vh;
-  background: rgba(0,0,0,0.7);
+  inset: 0;
+  background: rgba(0,0,0,.45);
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
+  padding: 24px;
+  z-index: 1000;
 }
 
+/* 弹窗体：更宽、更矮；超出滚动 */
 .modal-content {
-  background: white;
-  padding: 1.5rem;
-  border-radius: 12px;
-  max-width: 90%;
-  max-height: 90%;
+  box-sizing: border-box;
+  width: min(900px, 92vw);
+  max-height: 90vh;
   overflow: auto;
+  background: #fff;
+  border-radius: 14px;
+  padding: 20px 20px 12px;
   position: relative;
-  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
-.modal-image {
-  max-width: 100%;
-  max-height: 70vh;
-  margin-bottom: 1rem;
-  border-radius: 8px;
-}
-
+/* 关闭按钮 */
 .close {
   position: absolute;
-  top: 10px;
   right: 16px;
+  top: 12px;
   font-size: 28px;
-  font-weight: bold;
+  line-height: 1;
   cursor: pointer;
 }
 
-.photo-interaction {
-  margin-top: 1rem;
-  padding: 1rem;
-  border-top: 1px solid #ddd;
+/* 大图：按比例缩放、不拉伸，居中显示 */
+.modal-image {
+  width: 100%;
+  max-height: 60vh;      /* 留空间给点赞/评论 */
+  object-fit: contain;   /* 关键：不裁剪，完整显示 */
+  display: block;
+  margin: 0 auto;
 }
 
-.like-section {
+/* 只影响弹窗里的点赞+评论区域 */
+.modal-content .photo-interaction {
+  display: flex !important;          /* 覆盖原来的 grid */
+  flex-direction: column;            /* 上下排列 */
+  align-items: center;               /* 水平居中 */
+  gap: 14px;
+  margin-top: 8px;
+}
+
+/* 点赞块居中堆叠 */
+.modal-content .like-section {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 2rem;
+}
+.modal-content .like-count {
+  margin-top: 8px;
 }
 
-.like-button {
-  background: linear-gradient(to right, #f43f5e);
-  border: none;
-  border-radius: 8px;
-  padding: 0.7rem 1.5rem;
-  color: white;
-  font-size: 1rem;
-  cursor: pointer;
-  margin-bottom: 0.5rem;
+/* 评论块限制宽度并居中 */
+.modal-content .comment-section {
+  width: 100%;
+  max-width: 680px;                  /* 自己看着调 */
+  margin: 0 auto;
+  text-align: left;                  /* 标题居左更自然；想要居中就改成 center */
 }
 
-.like-count {
-  font-size: 0.95rem;
+/* 文本域/按钮居中排列 */
+/* Comment 标题居中 */
+.modal-content .comment-section h4 {
+  text-align: center;
+  margin-bottom: 10px;
 }
 
-.comment-section {
-  margin-top: 2rem;
+/* 输入框黑色边框 + 圆角 */
+.modal-content .comment-input {
+  width: 100%;
+  min-height: 90px;
+  display: block;
+  margin: 8px auto 0;
+  border: 1px solid black;   /* 黑色边框 */
+  border-radius: 6px;
+  padding: 8px;
 }
 
 .comment-list {
-  list-style: none;
+  list-style: none;         /* 去掉前面的点 */
   padding: 0;
-  margin: 1rem 0;
+  margin: 0;
+  text-align: center;       /* 水平居中 */
 }
 
 .comment-list li {
-  margin-bottom: 0.75rem;
+  margin: 6px 0;
+  font-size: 14px;
+  line-height: 1.5;
 }
 
-.comment-input {
-  width: 100%;
-  min-height: 80px;
-  padding: 0.75rem;
-  border: 1px solid #ccc;
-  border-radius: 10px;
-  resize: vertical;
-  font-size: 1rem;
-  margin-bottom: 1rem;
-}
-
-.comment-submit {
-  background: linear-gradient(to right, #f43f5e);
-  border: none;
-  color: white;
-  /* padding: 0.6rem 1.2rem; */
-  border-radius: 8px;
-  font-weight: bold;
-  cursor: pointer;
-}
-
-.day-selector {
-  margin-bottom: 1rem; /* ✅ 加大底部间距 */
-}
-
-.visibility-filter {
-  margin-bottom: 1rem;
+.modal-content .comment-submit {
+  display: block;
+  margin: 12px auto 0;               /* 居中 */
 }

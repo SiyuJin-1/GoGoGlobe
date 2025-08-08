@@ -11,6 +11,8 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.863.0",
+    "@aws-sdk/s3-request-presigner": "^3.863.0",
     "@prisma/client": "^6.8.2",
     "amqplib": "^0.10.8",
     "bcrypt": "^6.0.0",
@@ -21,6 +23,7 @@
     "express": "^5.1.0",
     "express-session": "^1.18.1",
     "jsonwebtoken": "^9.0.2",
+    "mime-types": "^3.0.1",
     "mongoose": "^8.15.1",
     "multer": "^2.0.2",
     "mysql2": "^3.14.1",
@@ -28,7 +31,8 @@
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
     "path-to-regexp": "^6.3.0",
-    "redis": "^5.8.0"
+    "redis": "^5.8.0",
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "prisma": "^6.8.2"

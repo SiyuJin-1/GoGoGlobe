@@ -224,7 +224,7 @@ export default function SplitwisePage() {
           </div>
           {balances.filter((b) => b.from === currentUserEmail).length > 0 ? (
   <>
-    <h5 style={{ marginTop: "0.5rem" }}>🔻 你需要支付：</h5>
+    {/* <h5 style={{ marginTop: "0.5rem" }}>🔻 你需要支付：</h5> */}
     {balances
       .filter((b) => b.from === currentUserEmail)
       .map((p, idx) => (
