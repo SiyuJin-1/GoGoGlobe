@@ -105,6 +105,9 @@ const handleSave = async () => {
     localStorage.removeItem("editingPlan"); // ✅ 清除编辑状态
     alert("✅ Plan saved successfully to database!");
     navigate("/summary-card");
+    window.location.reload();
+
+
   } catch (error) {
     console.error("❌ Save failed:", error);
     alert("❌ Failed to save plan");

@@ -14,34 +14,58 @@ function AIPlan() {
   const [structuredSchedule, setStructuredSchedule] = useState([]);
 
   const generatePlan = async () => {
-    const days = calculateDays(planData.startDate, planData.endDate);
+  const days = calculateDays(planData.startDate, planData.endDate);
+  try {
+    const response = await fetch('http://localhost:3001/api/plan', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        fromCity: planData.fromCity,
+        toCity: planData.destination,
+        days,
+        startDate: planData.startDate,
+        endDate: planData.endDate,
+        preferences: preference,
+      }),
+    });
+
+    let rawText = await response.text(); // 👈 不直接 .json()
+
+    // 尝试手动修复截断的 JSON
+    const start = rawText.indexOf('{');
+    const end = rawText.lastIndexOf('}');
+    if (start === -1 || end === -1) throw new Error("Invalid JSON range");
+
+    const jsonFixed = rawText.slice(start, end + 1);
+
+    let data = {};
     try {
-      const response = await fetch('http://localhost:3001/api/plan', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          fromCity: planData.fromCity,
-          toCity: planData.destination,
-          days,
-          startDate: planData.startDate,
-          endDate: planData.endDate,
-          preferences: preference,
-        }),
-      });
-      
-      const data = await response.json();
-      
-      console.log("🐛 AI 返回的数据：", data);
-          setPlan(data.markdown);
+      data = JSON.parse(jsonFixed);
+    } catch (jsonErr) {
+      console.error("❌ JSON parse error:", jsonErr);
+      alert("AI 返回的数据格式错误，可能被截断了。请重新点击生成行程！");
+      return;
+    }
+
+    console.log("🐛 AI 修复后的数据：", data);
+
+    // 更新页面
+    setPlan(data.markdown);
     setStructuredSchedule(data.schedule);
 
-        if (data.schedule.length < days || data.schedule.some(day => day.items.length < 3)) {
+    // 验证是否结构完整
+    if (
+      data.schedule.length < days ||
+      data.schedule.some((day) => day.items.length < 3)
+    ) {
       alert("⚠️ AI 行程结构可能不完整，可点击 Generate Plan 再试一次！也可以直接应用该行程并手动添加内容。");
     }
-    } catch (err) {
-      console.error('Error generating plan:', err);
-    }
-  };
+  } catch (err) {
+    console.error("❌ Error generating plan:", err);
+    alert("服务器连接失败或数据出错，请稍后再试。");
+  }
+};
+
 
   const handleApplyPlan = () => {
     localStorage.setItem("myPlan", JSON.stringify({ schedule: structuredSchedule }));

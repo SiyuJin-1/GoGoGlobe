@@ -95,7 +95,7 @@ function CreatePlan() {
             checked={planMode === "ai"}
             onChange={() => setPlanMode("ai")}
         />
-            Use AI to help plan
+            Use AI to plan your trip (up to 4 days only)
         </label>
 
         <label>

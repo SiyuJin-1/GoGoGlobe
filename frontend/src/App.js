@@ -14,6 +14,7 @@ import Member from './pages/Member';
 import Accommodation from './pages/Accommodation';
 import Splitwise from './pages/Splitwise';
 import NotificationList from './pages/NotificationList';
+import TripPhoto from './pages/TripPhoto';
 
 
 function App() {
@@ -34,6 +35,7 @@ function App() {
         {/* <Route path="/budget" element={<PlanSummary />} /> */}
         <Route path="/accommodation/:id" element={<Accommodation />} />
         <Route path="/splitwise/:id" element={<Splitwise />} />
+        <Route path="/photo/:id" element={<TripPhoto />} />
 
         <Route path="/summary-card" element={<SummaryCard />} />
         <Route path="/itinerary" element={<MyItinerary />} />

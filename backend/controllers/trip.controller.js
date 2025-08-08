@@ -18,7 +18,9 @@ exports.saveTrip = async (req, res) => {
         startDate: new Date(startDate),
         endDate: new Date(endDate),
         schedule,
-        items: [],
+        members: {
+          create: [{ userId: Number(userId) }], // ✅ 必须添加这句
+        },
       },
     });
 
@@ -80,7 +82,10 @@ exports.getTripsByUser = async (req, res) => {
   }
 };
 
+
+
 // ✅ 删除 Trip（先查 userId，再清除缓存）
+// ✅ 删除 Trip（先删子项，再删主 trip）
 exports.deleteTrip = async (req, res) => {
   const { id } = req.params;
 
@@ -93,7 +98,22 @@ exports.deleteTrip = async (req, res) => {
       return res.status(404).json({ message: "Trip not found" });
     }
 
-    await prisma.trip.delete({ where: { id: Number(id) } });
+    // ✅ 删除 items
+    await prisma.item.deleteMany({
+      where: { tripId: Number(id) },
+    });
+
+    // ✅ 删除 members
+    await prisma.member.deleteMany({
+      where: { tripId: Number(id) },
+    });
+
+    // ✅ 最后删除 trip 本体
+    await prisma.trip.delete({
+      where: { id: Number(id) },
+    });
+
+    // ✅ 清缓存
     await redisClient.del(`user_trips_${trip.userId}`);
     console.log(`🧹 清除缓存: user_trips_${trip.userId}`);
 
@@ -103,6 +123,7 @@ exports.deleteTrip = async (req, res) => {
     res.status(500).json({ error: "Failed to delete trip" });
   }
 };
+
 
 // ✅ 更新 Trip（更新后清除缓存 + 发通知）
 exports.updateTrip = async (req, res) => {

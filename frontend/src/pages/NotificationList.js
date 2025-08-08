@@ -5,19 +5,25 @@ export default function NotificationList() {
   const { id } = useParams(); // 当前用户 ID
   const [notifications, setNotifications] = useState([]);
 
-  useEffect(() => {
-    const fetchNotifications = async () => {
-      try {
-        const res = await fetch(`http://localhost:3001/api/notification/user/${id}`);
-        const data = await res.json();
-        setNotifications(data);
-      } catch (err) {
-        console.error("❌ 获取通知失败", err);
-      }
-    };
+useEffect(() => {
+  const fetchNotifications = async () => {
+    const userId = localStorage.getItem("userId");
+    console.log("当前用户ID:", userId); // 👈 加上这句
 
-    fetchNotifications();
-  }, [id]);
+    if (!userId) return; // 没有登录，直接跳过
+
+    try {
+      const res = await fetch(`http://localhost:3001/api/notification/user/${userId}`);
+      const data = await res.json();
+      setNotifications(data);
+    } catch (err) {
+      console.error("❌ 获取通知失败", err);
+    }
+  };
+
+  fetchNotifications();
+}, []); // ✅ 空依赖数组，不再依赖 URL 参数 id
+
 
   const markAsRead = async (notificationId) => {
     try {

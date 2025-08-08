@@ -71,7 +71,9 @@ const notificationRoutes = require("./routes/notificationRoutes");
 console.log("🚨 notificationRoutes 类型：", typeof notificationRoutes); // 👈 加这句
 app.use("/api/notification", notificationRoutes);
 
-
+const photoRoutes = require("./routes/photo");
+app.use("/api/photo", photoRoutes);
+console.log("photo routes loaded successfully");
 // ✅ 基础测试接口
 // console.log("About to load AI routes...");
 // app.get("/", (req, res) => {

@@ -13,7 +13,7 @@ function SubNavBar() {
         <Link to="/home" className={`nav-tab ${location.pathname === '/home' ? 'active' : ''}`}>
           🏠 Back homepage
         </Link>
-        <Link to="/itinerary" className={`nav-tab ${location.pathname === '/itinerary' ? 'active' : ''}`}>
+        <Link to="/summary-card" className={`nav-tab ${location.pathname === '/summary-card' ? 'active' : ''}`}>
           📅 My Itinerary
         </Link>
         <Link
@@ -39,6 +39,12 @@ function SubNavBar() {
           className={`nav-tab ${location.pathname === `/splitwise/${userId}` ? 'active' : ''}`}
         >
           💰 Splitwise
+        </Link>
+        <Link
+          to={userId ? `/photo/${userId}` : "#"}  // ✅ 拼接用户ID
+          className={`nav-tab ${location.pathname === `/photo/${userId}` ? 'active' : ''}`}
+        >
+          📸 Photos
         </Link>
       </div>
     </>
