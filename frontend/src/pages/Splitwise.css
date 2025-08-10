@@ -126,3 +126,37 @@
   cursor: pointer;
   margin-top: 1.5rem;
 }
+
+/* 每行改成网格：名称 | 金额 | 付款人 | 垃圾桶 */
+.budget-row {
+  display: grid;
+  grid-template-columns: 1fr 140px minmax(260px, 1fr) 40px;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+/* 右侧小图标按钮 */
+.icon-btn {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 8px;
+  color: grey;
+}
+.icon-btn:hover {
+  background: #ffe9e9;
+}
+
+/* 底部操作区：把“添加 / 保存”放在底部右侧 */
+.actions-bottom {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+/* 如需让右侧卡片更宽一些，可酌情加：
+.splitwise-card.right { min-width: 620px; }
+*/

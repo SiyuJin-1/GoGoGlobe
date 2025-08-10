@@ -1,0 +1,19 @@
+{
+  "name": "notification-service",
+  "version": "1.0.0",
+  "main": "consumer.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node consumer.js",
+    "generate": "prisma generate"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.8.2",
+    "amqplib": "0.10.3",
+    "dotenv": "16.4.5",
+    "mysql2": "3.9.7"
+  },
+  "devDependencies": {
+    "prisma": "5.16.1"
+  }
+}

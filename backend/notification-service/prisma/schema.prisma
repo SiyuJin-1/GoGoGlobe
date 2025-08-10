@@ -1,0 +1,177 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             Int            @id @default(autoincrement())
+  email          String         @unique
+  password       String?
+  googleId       String?        @unique 
+  trips          Trip[]         @relation("UserTrips")
+  members        Member[]
+  notifications  Notification[]
+  photos         Photo[]        @relation("UserPhotos")
+  paidExpenses   Expense[]      @relation("PaidExpenses")
+  splits         Split[]        @relation("UserSplits")
+
+  likes          Like[]         // 👍 反向关系
+  comments       Comment[]      // 💬 反向关系
+}
+
+model Trip {
+  id              Int               @id @default(autoincrement())
+  userId          Int
+  fromCity        String
+  destination     String
+  startDate       DateTime
+  endDate         DateTime
+  schedule        Json?
+
+  items           Item[]
+  members         Member[]
+  accommodations  Accommodation[]
+  expenses        Expense[]        // Expense.trip
+  splits          Split[]          @relation("TripSplits")
+  photos          Photo[]          @relation("TripPhotos")
+  notifications   Notification[]   @relation("TripNotifications")
+
+  user            User             @relation("UserTrips", fields: [userId], references: [id])
+}
+
+model Item {
+  id          Int     @id @default(autoincrement())
+  name        String
+  packed      Boolean
+  assignedTo  String
+
+  trip        Trip    @relation(fields: [tripId], references: [id])
+  tripId      Int
+}
+
+model Member {
+  id       Int     @id @default(autoincrement())
+  user     User    @relation(fields: [userId], references: [id])
+  userId   Int
+
+  trip     Trip    @relation(fields: [tripId], references: [id])
+  tripId   Int
+
+  role     String  @default("Member")
+  online   Boolean @default(false)
+  tasks    Int     @default(0)
+}
+
+model Accommodation {
+  id          Int      @id @default(autoincrement())
+  tripId      Int
+  name        String
+  address     String
+  checkIn     DateTime
+  checkOut    DateTime
+  imageUrl    String?
+  imageKey   String?
+  bookingUrl  String?   @db.Text
+
+  trip        Trip      @relation(fields: [tripId], references: [id])
+
+  @@map("accommodations")
+}
+
+model Expense {
+  id        Int      @id @default(autoincrement())
+  trip      Trip     @relation(fields: [tripId], references: [id])
+  tripId    Int
+  payer     User     @relation("PaidExpenses", fields: [payerId], references: [id])
+  payerId   Int
+  amount    Float
+  note      String?
+  createdAt DateTime @default(now())
+
+  splits    Split[]
+}
+
+model Split {
+  id         Int     @id @default(autoincrement())
+  trip       Trip    @relation("TripSplits", fields: [tripId], references: [id])
+  tripId     Int
+
+  expense    Expense @relation(fields: [expenseId], references: [id])
+  expenseId  Int
+
+  user       User    @relation("UserSplits", fields: [userId], references: [id])
+  userId     Int
+
+  amount     Float
+}
+
+model Photo {
+  id          Int       @id @default(autoincrement())
+  tripId      Int
+  uploadedBy  Int
+  imageUrl    String?
+  imageKey    String?
+  gps         String?
+  dayIndex    Int
+  placeName   String?
+  description String?
+  visibility  String    @default("public")
+  createdAt   DateTime  @default(now())
+
+  trip Trip @relation("TripPhotos", fields: [tripId], references: [id], onDelete: Cascade)
+  user User @relation("UserPhotos", fields: [uploadedBy], references: [id], onDelete: Cascade)
+
+
+  likes       Like[]
+  comments    Comment[]
+}
+
+model Like {
+  id        Int     @id @default(autoincrement())
+  photo     Photo   @relation(fields: [photoId], references: [id], onDelete: Cascade)  // ⭐
+  photoId   Int
+
+  user      User    @relation(fields: [userId], references: [id])
+  userId    Int
+
+  createdAt DateTime @default(now())
+
+  @@unique([photoId, userId])
+}
+
+model Comment {
+  id        Int     @id @default(autoincrement())
+  photo     Photo   @relation(fields: [photoId], references: [id], onDelete: Cascade)  // ⭐
+  photoId   Int
+
+  user      User    @relation(fields: [userId], references: [id])
+  userId    Int
+
+  content   String
+  createdAt DateTime @default(now())
+}
+
+
+model Notification {
+  id        Int      @id @default(autoincrement())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+
+  trip      Trip?    @relation("TripNotifications", fields: [tripId], references: [id])
+  tripId    Int?
+
+  message   String
+  type      String?
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+}

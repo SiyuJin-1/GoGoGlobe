@@ -201,28 +201,46 @@
   z-index: 10001;
 }
 
-.item-footer-buttons {
-  margin-top: 1rem;
-  display: flex;
-  gap: 35rem;
-}
 
-.add-item-btn,
-.delete-item-btn {
-  background: linear-gradient(to right, #ff416c, #ff4b2b);
-  border: none;
-  color: white;
-  font-weight: bold;
+/* 强制按钮样式（覆盖任何全局 reset） */
+.my-itinerary-wrapper .add-item-btn,
+.my-itinerary-wrapper .delete-item-btn {
+  background-color: #ff416c !important;   /* 背景色 */
+  background-image: none !important;      /* 不要背景图覆盖 */
+  color: #fff !important;                 /* 字体白色 */
+  border: none !important;
+  font-weight: 700;
   padding: 0.6rem 1.2rem;
   border-radius: 8px;
   cursor: pointer;
-  transition: 0.2s ease-in-out;
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  transition: filter .15s ease-in-out;
+  -webkit-appearance: none;
+  appearance: none;
 }
 
-.add-item-btn:hover,
-.delete-item-btn:hover {
-  opacity: 0.9;
+.my-itinerary-wrapper .add-item-btn:hover,
+.my-itinerary-wrapper .delete-item-btn:hover {
+  filter: brightness(0.92);
 }
+
+.my-itinerary-wrapper .add-item-btn:disabled,
+.my-itinerary-wrapper .delete-item-btn:disabled {
+  opacity: .6;
+  cursor: not-allowed;
+}
+
+/* 调整按钮行的布局，不要 35rem 的大间距 */
+.item-footer-buttons {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: flex-end;  /* 右对齐 */
+  gap: 30rem;                /* 正常间距 */
+}
+
+
 
 
 

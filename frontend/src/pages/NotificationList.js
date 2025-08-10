@@ -5,36 +5,65 @@ export default function NotificationList() {
   const { id } = useParams(); // 当前用户 ID
   const [notifications, setNotifications] = useState([]);
 
-useEffect(() => {
-  const fetchNotifications = async () => {
-    const userId = localStorage.getItem("userId");
-    console.log("当前用户ID:", userId); // 👈 加上这句
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      // 1) 先尝试从本地或路由拿
+      let userId = localStorage.getItem("userId") || id;
+      console.log("当前用户ID:", userId);
 
-    if (!userId) return; // 没有登录，直接跳过
+      // 2) 都没有就去会话接口拿一次
+      if (!userId) {
+        try {
+          const meRes = await fetch("http://localhost:3001/api/auth/me", {
+            credentials: "include",
+          });
+          const ct = meRes.headers.get("content-type") || "";
+          if (meRes.ok && ct.includes("application/json")) {
+            const me = await meRes.json();
+            if (me?.user?.id) {
+              userId = String(me.user.id);
+              localStorage.setItem("userId", userId);
+            }
+          }
+        } catch (_) {}
+      }
 
-    try {
-      const res = await fetch(`http://localhost:3001/api/notification/user/${userId}`);
-      const data = await res.json();
-      setNotifications(data);
-    } catch (err) {
-      console.error("❌ 获取通知失败", err);
-    }
-  };
+      if (!userId) return; // 仍然拿不到就直接返回
 
-  fetchNotifications();
-}, []); // ✅ 空依赖数组，不再依赖 URL 参数 id
+      try {
+        const res = await fetch(
+          `http://localhost:3001/api/notification/user/${userId}`,
+          { credentials: "include" }
+        );
+        const ct = res.headers.get("content-type") || "";
+        if (!ct.includes("application/json")) {
+          // 避免把 HTML 当 JSON
+          console.warn("Expected JSON, got:", ct, "body:", await res.text());
+          setNotifications([]);
+          return;
+        }
+        const data = await res.json();
+        setNotifications(Array.isArray(data) ? data : []);
+      } catch (err) {
+        console.error("❌ 获取通知失败", err);
+      }
+    };
 
+    fetchNotifications();
+  }, []); // ✅ 保持你的空依赖
 
   const markAsRead = async (notificationId) => {
     try {
-      await fetch(`http://localhost:3001/api/notification/${notificationId}/read`, {
-        method: "PATCH",
-      });
+      await fetch(
+        `http://localhost:3001/api/notification/${notificationId}/read`,
+        {
+          method: "PATCH",
+          credentials: "include",
+        }
+      );
 
       setNotifications((prev) =>
-        prev.map((n) =>
-          n.id === notificationId ? { ...n, isRead: true } : n
-        )
+        prev.map((n) => (n.id === notificationId ? { ...n, isRead: true } : n))
       );
     } catch (err) {
       console.error("❌ 标记为已读失败", err);
@@ -57,7 +86,9 @@ useEffect(() => {
               }`}
             >
               <div className="flex justify-between items-start">
-                <div className="text-base font-medium text-gray-800">{n.message}</div>
+                <div className="text-base font-medium text-gray-800">
+                  {n.message}
+                </div>
                 <div className="text-sm text-gray-500 ml-4 whitespace-nowrap">
                   {new Date(n.createdAt).toLocaleString()}
                 </div>
@@ -70,7 +101,6 @@ useEffect(() => {
                 >
                   标记为已读
                 </button>
-
               )}
             </div>
           ))}

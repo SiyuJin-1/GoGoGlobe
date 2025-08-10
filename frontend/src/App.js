@@ -1,5 +1,6 @@
 // App.js
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { useEffect } from 'react';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Home from './pages/Home';
@@ -15,18 +16,35 @@ import Accommodation from './pages/Accommodation';
 import Splitwise from './pages/Splitwise';
 import NotificationList from './pages/NotificationList';
 import TripPhoto from './pages/TripPhoto';
+import ManualPlan from './pages/MyItinerary';
 
-
+const API_BASE = process.env.REACT_APP_API_BASE || '';
 function App() {
+  useEffect(() => {
+    fetch(`${API_BASE}/api/auth/me`, { credentials: 'include' })
+      .then(r => r.ok ? r.json() : { user: null })
+      .then(data => {
+        const id = data?.user?.id;
+        if (id) {
+          localStorage.setItem('userId', String(id));
+        } else {
+          localStorage.removeItem('userId');
+        }
+      })
+      .catch(() => {
+        // 静默忽略网络错误
+      });
+  }, []);
+
   return (
     <Router>
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/home" element={<Home />} />
+        <Route path="/" element={<Home />} />
         <Route path="/create" element={<CreatePlan />} />
         <Route path="/aiplan" element={<AIPlan />} />
-        {/* <Route path="/manualplan" element={<ManualPlan />} /> */}
+        <Route path="/my-itinerary" element={<ManualPlan />} />
         <Route path="/my-itinerary" element={<MyItinerary />} />
         <Route path="/plan-summary/:id" element={<PlanSummary />} />
         <Route path="/packing/:id" element={<PackList />} />

@@ -10,7 +10,7 @@ function SubNavBar() {
     <>
       <hr className="subnav-divider" />
       <div className="top-nav-bar">
-        <Link to="/home" className={`nav-tab ${location.pathname === '/home' ? 'active' : ''}`}>
+        <Link to="/" className={`nav-tab ${location.pathname === '/home' ? 'active' : ''}`}>
           🏠 Back homepage
         </Link>
         <Link to="/summary-card" className={`nav-tab ${location.pathname === '/summary-card' ? 'active' : ''}`}>

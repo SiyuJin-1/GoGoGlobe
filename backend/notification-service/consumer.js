@@ -1,5 +1,6 @@
 const amqp = require("amqplib");
-const { PrismaClient } = require("../generated/prisma");
+const { PrismaClient } = require("@prisma/client");
+
 require("dotenv").config();
 
 const prisma = new PrismaClient();

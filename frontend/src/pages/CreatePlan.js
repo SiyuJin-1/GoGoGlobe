@@ -19,24 +19,32 @@ function CreatePlan() {
 
 
   const handleSubmit = (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    const planData = {
+  const planData = {
     destination,
     startDate,
     fromCity,
     endDate,
-    // participants,
     planMode,
-    };
-    localStorage.setItem("planData", JSON.stringify(planData));
-
-    if (planMode === "ai") {
-        navigate("/aiplan", { state: planData });
-    } else {
-        navigate("/manualplan", { state: planData });
-    }
+    isManual: planMode === "manual", // ← 带个标记，MyItinerary 会识别
+    source: planMode,                // ← 备选标记
   };
+
+  // 关键：把模式写入 localStorage，供 MyItinerary 检测
+  localStorage.setItem("planMode", planMode);        // ← 新增
+  localStorage.setItem("planData", JSON.stringify(planData));
+
+  // 建议清一下旧的编辑态
+  localStorage.removeItem("editingPlan");
+
+  if (planMode === "ai") {
+    navigate("/aiplan", { state: planData });
+  } else {
+    navigate("/my-itinerary", { state: planData });
+  }
+};
+
 
   return (
     <>

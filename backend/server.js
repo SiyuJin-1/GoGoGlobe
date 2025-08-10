@@ -3,110 +3,82 @@ const cors = require("cors");
 const dotenv = require("dotenv");
 const session = require("express-session");
 const passport = require("passport");
-const cookieParser = require('cookie-parser');
-const { connectRabbitMQ } = require("./utils/rabbitmq");
-connectRabbitMQ();
+const cookieParser = require("cookie-parser");
 
-require("./passport"); // 👈 加载 passport 设置
+// ✅ NEW: 引入我们写好的 MQ 初始化函数
+const { initRabbit } = require("./utils/rabbitmq");
 
 dotenv.config();
-
 const app = express();
 
-// CORS 设置（允许前端访问并携带 cookie）
+/* ---------- CORS（带凭证） ---------- */
+const ALLOWED_ORIGINS = ['http://localhost', 'http://localhost:3000', 'http://localhost:3001'];
 app.use(cors({
-  origin: ['http://localhost:3000',"http://localhost:3001"],
-  credentials: true
+  origin: (origin, cb) => cb(null, !origin || ALLOWED_ORIGINS.includes(origin)),
+  credentials: true,
 }));
 
 app.use(express.json());
 app.use(cookieParser());
 
-// 🧠 添加 session 支持
 app.use(session({
-  secret: process.env.SESSION_SECRET || "default_secret", // 你自己定义的 secret
+  secret: process.env.SESSION_SECRET || 'dev_secret',
   resave: false,
   saveUninitialized: false,
   cookie: {
     httpOnly: true,
-    secure: false, // 本地开发必须为 false，HTTPS 部署才为 true
-    sameSite: 'none' // 或 'none'，但 'lax' 已足够应对 Google 登录回跳
-  }
+    secure: false,
+    sameSite: 'lax',
+  },
 }));
 
-// 🧠 启用 passport
+/* ---------- Passport ---------- */
+require("./passport");
 app.use(passport.initialize());
 app.use(passport.session());
-app.use("/uploads", express.static("uploads")); // 图片可访问
 
-// ✅ 接入 plan 接口
-console.log("About to load plan routes...");
-app.use("/api/plan", require("./routes/plan.route"));
-console.log("Plan routes loaded successfully");
+app.use("/uploads", express.static("uploads"));
 
-// ✅ 接入 auth 路由（包括 Google 登录）
-console.log("About to load auth routes...");
-const authRoutes = require("./routes/auth");
-app.use("/api/auth", authRoutes);
-console.log("Auth routes loaded successfully");
-
-console.log("About to load trip routes...");
-const tripRoutes = require('./routes/trip');
-app.use('/api/trip', tripRoutes);
-console.log("Trip routes loaded successfully");
-
-const memberRoutes = require('./routes/member');
-app.use("/api/members", memberRoutes);
-console.log("Members routes loaded successfully");
-
-const accommodationRoutes = require('./routes/accommodation');
-app.use("/api/accommodations", accommodationRoutes);
-console.log("Accommodation routes loaded successfully");
-
-const expensesRoutes = require("./routes/expenses");
-app.use("/api/expenses", expensesRoutes);
-console.log("Expenses routes loaded successfully");
-
-const notificationRoutes = require("./routes/notificationRoutes");
-console.log("🚨 notificationRoutes 类型：", typeof notificationRoutes); // 👈 加这句
-app.use("/api/notification", notificationRoutes);
-
-const photoRoutes = require("./routes/photo");
-app.use("/api/photo", photoRoutes);
-console.log("photo routes loaded successfully");
-
-const UploadRoutes = require("./routes/upload");
-app.use("/api/upload", UploadRoutes);
-
-// ✅ 基础测试接口
-// console.log("About to load AI routes...");
-// app.get("/", (req, res) => {
-//   res.send("🌍 The AI travel backend has been launched");
-// });
-// console.log("AI routes loaded successfully");
-
-// const path = require("path");
-// app.use(express.static(path.resolve(__dirname, "../frontend/build")));
-// // const fullPath = path.join(__dirname, "../frontend/build");
-// // console.log("Static files path:", fullPath);
-// // console.log("Index.html path:", path.join(fullPath, "index.html"));
-// // console.log("Directory exists:", require('fs').existsSync(fullPath));
-
-// const frontendRoutes = [
-//   "/", "/login", "/register", "/my-itinerary", "/summary-card", 
-//   "/create-plan", "/home"
-// ];
-
-// // 逐个绑定这些前端路由，返回 index.html
-// frontendRoutes.forEach(route => {
-//   app.get(route, (req, res) => {
-//     res.sendFile(path.resolve(__dirname, "../frontend/build/index.html"));
-//   });
-// });
-
-
-// ✅ 启动服务器
-const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
-  console.log(`🚀 Server is running on http://localhost:${PORT}`);
+/* ---------- 登录态接口 ---------- */
+app.get("/api/auth/me", (req, res) => {
+  if (req.user?.id) return res.json({ user: { id: req.user.id, email: req.user.email } });
+  if (req.session?.user?.id) return res.json({ user: req.session.user });
+  return res.json({ user: null });
 });
+
+app.post("/api/dev/login-as/:id", (req, res) => {
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id) || id <= 0) return res.status(400).json({ message: "bad id" });
+  req.session.user = { id };
+  res.json({ ok: true, user: req.session.user });
+});
+
+/* ---------- 业务路由 ---------- */
+app.use("/api/plan", require("./routes/plan.route"));
+app.use("/api/auth", require("./routes/auth"));
+app.use("/api/trip", require("./routes/trip"));
+app.use("/api/members", require("./routes/member"));
+app.use("/api/accommodations", require("./routes/accommodation"));
+app.use("/api/notification", require("./routes/notificationRoutes"));
+app.use("/api/photo", require("./routes/photo"));
+app.use("/api/upload", require("./routes/upload"));
+app.use("/api/expenses", require("./routes/expenses"));
+app.use("/api", require("./routes/debug"));
+
+app.get('/api/auth/debug/set', (req, res) => {
+  req.session.user = { id: 999, email: 'debug@local' };
+  req.session.save(() => res.json({ ok: true, sid: req.sessionID }));
+});
+
+app.get('/api/auth/debug/get', (req, res) => {
+  res.json({ sid: req.sessionID, user: req.session?.user || null });
+});
+
+const PORT = process.env.PORT || 3001;
+
+// ✅ NEW: 启动时先连 RabbitMQ（失败会打日志，成功会打印 [RMQ] connected）
+initRabbit().catch(err => {
+  console.error("[RMQ] init failed:", err?.message || err);
+});
+
+app.listen(PORT, '0.0.0.0', () => console.log(`listening on ${PORT}`));

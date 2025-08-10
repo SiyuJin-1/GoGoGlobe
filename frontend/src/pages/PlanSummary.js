@@ -1,46 +1,96 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import "./PlanSummary.css";
+import Navbar from "./Navbar";
+import SubNavBar from "./SubNavBar";
 
-function PlanSummary() {
+export default function PlanSummary() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [plan, setPlan] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchPlan = async () => {
+    (async () => {
       try {
-        const res = await fetch(`http://localhost:3001/api/trip/${id}`);
+        const res = await fetch(`http://localhost:3001/api/trip/${id}`, {
+          credentials: "include",
+        });
         const data = await res.json();
         setPlan(data);
       } catch (err) {
-        console.error("❌ 获取 plan 失败:", err);
+        console.error("❌ fetch plan failed:", err);
+      } finally {
+        setLoading(false);
       }
-    };
-    fetchPlan();
+    })();
   }, [id]);
 
-  if (!plan) return <p style={{ padding: "2rem" }}>⏳ Loading...</p>;
+  if (loading) {
+    return <div className="ps-loader">Loading…</div>;
+  }
+  if (!plan || !Array.isArray(plan?.schedule)) {
+    return <div className="ps-empty">No schedule found for this plan.</div>;
+  }
 
   return (
-    <div className="plan-summary-wrapper">
-      <h2>📅 Your Travel Summary</h2>
+    <>
+        <Navbar />
+        <SubNavBar/>
+    <div className="ps-wrapper">
+      <h2 className="ps-title">Your Travel Summary</h2>
+
       {plan.schedule.map((day, i) => (
-        <div className="day-summary-card" key={i}>
-          <h3>{day.date}</h3>
-          {day.items.map((item, j) => (
-            <div className="summary-item" key={j}>
-              <div className="summary-time">🕐 {item.time}</div>
-              <div className="summary-title">📍 {item.locationName || item.title}</div>
-              {item.description && <div className="summary-desc">{item.description}</div>}
-              {item.duration && <div className="summary-duration">⏱ {item.duration}</div>}
-            </div>
-          ))}
-        </div>
+        <section className="ps-day-card" key={i}>
+          <header className="ps-day-header">
+            <span className="ps-day-dot" />
+            <h3 className="ps-day-date">
+              {day?.date
+                ? new Date(day.date).toLocaleDateString()
+                : `Day ${i + 1}`}
+            </h3>
+          </header>
+
+          <div className="ps-timeline">
+            {(day.items || []).map((item, j) => (
+              <article className="ps-item" key={j}>
+                <div className="ps-time">
+                  <span className="ps-time-icon">🕐</span>
+                  {item.time || "—"}
+                </div>
+
+                <div className="ps-node">
+                  <span className="ps-pin">📍</span>
+                </div>
+
+                <div className="ps-content">
+                  <div className="ps-place">
+                    {item.locationName || item.title || "Untitled"}
+                  </div>
+
+                  {item.description && (
+                    <div className="ps-desc">{item.description}</div>
+                  )}
+
+                  {item.duration && (
+                    <div className="ps-meta">
+                      <span className="ps-meta-icon">⏱</span>
+                      {item.duration}
+                    </div>
+                  )}
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
       ))}
-      <button onClick={() => navigate("/summary-card")}>← Back to My Plans</button>
+
+      <div className="ps-actions">
+        <button className="ps-btn" onClick={() => navigate("/summary-card")}>
+          ← Back to My Plans
+        </button>
+      </div>
     </div>
+    </>
   );
 }
-
-export default PlanSummary;
