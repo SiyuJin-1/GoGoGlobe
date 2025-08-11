@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "./Navbar.css";
 
-const API_BASE = process.env.REACT_APP_API_BASE || "http://localhost:3001";
+const API_BASE = process.env.REACT_APP_API_BASE || "/api";
+
 
 function Navbar() {
   const navigate = useNavigate();
@@ -32,7 +33,7 @@ function Navbar() {
       return id;
     }
     try {
-      const d = await getJSON("/api/auth/me");
+      const d = await getJSON("/auth/me");
       if (d?.user?.id) {
         id = String(d.user.id);
         localStorage.setItem("userId", id);
@@ -54,10 +55,10 @@ function Navbar() {
         return;
       }
       try {
-        const data = await getJSON(`/api/notification/user/${id}/unread-count`);
+        const data = await getJSON(`/notification/user/${id}/unread-count`);
         if (!stopped) setUnreadCount(Number(data?.count || 0));
       } catch (err) {
-        console.warn("获取未读通知数量失败:", err.message);
+        console.warn("Failed to fetch unread notification count:", err.message);
         if (!stopped) setUnreadCount(0);
       }
     };
@@ -70,7 +71,7 @@ function Navbar() {
   const handleSignOut = async (e) => {
     e.preventDefault();
     try {
-      await fetch(`${API_BASE}/api/auth/logout`, {
+      await fetch(`${API_BASE}/auth/logout`, {
         method: "POST",
         credentials: "include",
       });

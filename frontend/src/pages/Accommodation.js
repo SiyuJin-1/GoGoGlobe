@@ -5,10 +5,7 @@ import SubNavBar from "./SubNavBar";
 import AccommodationForm from "./AccommodationForm";
 import "./Accommodation.css";
 
-// 允许用环境变量覆盖后端地址：VITE_API_BASE=http://localhost:3001
-const API_BASE =
-  (typeof import.meta !== "undefined" && import.meta.env?.VITE_API_BASE) ||
-  "http://localhost:3001";
+const API_BASE = process.env.REACT_APP_API_BASE || "/api";
 
 export default function AddAccommodationPage() {
   const { id } = useParams(); // 当前用户 ID
@@ -38,7 +35,7 @@ export default function AddAccommodationPage() {
   useEffect(() => {
     const fetchTrips = async () => {
       try {
-        const res = await fetch(`${API_BASE}/api/trip/user/${id}`);
+        const res = await fetch(`${API_BASE}/trip/user/${id}`);
         const data = await res.json();
         if (Array.isArray(data) && data.length > 0) {
           setTripList(data);
@@ -48,7 +45,7 @@ export default function AddAccommodationPage() {
           setSelectedTripId(null);
         }
       } catch (err) {
-        console.error("❌ 获取行程失败:", err);
+        console.error("❌ Failed to fetch trips:", err);
       }
     };
     fetchTrips();
@@ -56,11 +53,11 @@ export default function AddAccommodationPage() {
 
   const loadAccommodations = async (tripId) => {
     try {
-      const res = await fetch(`${API_BASE}/api/accommodations?tripId=${tripId}`);
+      const res = await fetch(`${API_BASE}/accommodations?tripId=${tripId}`);
       const data = await res.json();
       setAccommodations((data || []).sort((a, b) => Date.parse(a.checkIn) - Date.parse(b.checkIn)));
     } catch (err) {
-      console.error("❌ 获取住宿失败:", err);
+      console.error("❌ Failed to fetch accommodations:", err);
     }
   };
 
@@ -71,7 +68,7 @@ export default function AddAccommodationPage() {
   // ---------- S3 直传（编辑换图时用） ----------
   async function uploadToS3(file, { userId, tripId }) {
     // 取预签名：加 kind=accommodation -> 公开桶
-    const r1 = await fetch(`${API_BASE}/api/upload/sign`, {
+    const r1 = await fetch(`${API_BASE}/upload/sign`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -82,7 +79,7 @@ export default function AddAccommodationPage() {
         kind: "accommodation",
       }),
     });
-    if (!r1.ok) throw new Error("获取签名失败：" + (await r1.text().catch(() => "")));
+    if (!r1.ok) throw new Error("Failed to get signed URL：" + (await r1.text().catch(() => "")));
     const { uploadUrl, publicUrl, key } = await r1.json();
 
     // PUT 到 S3（Content-Type 必须与签名一致）
@@ -91,26 +88,26 @@ export default function AddAccommodationPage() {
       headers: { "Content-Type": file.type },
       body: file,
     });
-    if (!r2.ok) throw new Error("上传到 S3 失败：" + (await r2.text().catch(() => "")));
+    if (!r2.ok) throw new Error("Failed to upload to S3：" + (await r2.text().catch(() => "")));
 
     return { publicUrl, key };
   }
 
   // ---------- 删除 ----------
   const handleDelete = async (accId, tripId) => {
-    if (!window.confirm("确定删除这条住宿吗？")) return;
+    if (!window.confirm("Are you sure you want to delete this accommodation?")) return;
     try {
       setDeletingId(accId);
-      const r = await fetch(`${API_BASE}/api/accommodations/${accId}`, {
+      const r = await fetch(`${API_BASE}/accommodations/${accId}`, {
         method: "DELETE",
       });
       if (!r.ok) {
         const msg = await r.text().catch(() => "");
-        throw new Error(msg || "删除失败");
+        throw new Error(msg || "Failed to delete");
       }
       await loadAccommodations(tripId);
     } catch (e) {
-      alert(e.message || "删除失败");
+      alert(e.message || "Failed to delete");
     } finally {
       setDeletingId(null);
     }
@@ -144,7 +141,7 @@ export default function AddAccommodationPage() {
         imageKey = key;
       }
 
-      const r = await fetch(`${API_BASE}/api/accommodations/${editing.id}`, {
+      const r = await fetch(`${API_BASE}/accommodations/${editing.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -162,7 +159,7 @@ export default function AddAccommodationPage() {
       setEditing(null);
       await loadAccommodations(selectedTripId);
     } catch (e) {
-      alert("更新失败：" + (e.message || "未知错误"));
+      alert("Failed to update：" + (e.message || "Unknown error"));
     } finally {
       setSaving(false);
     }

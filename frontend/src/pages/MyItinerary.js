@@ -5,7 +5,8 @@ import "./MyItinerary.css";
 import Navbar from "./Navbar";
 import MapView from "./MapView";
 
-const API_BASE = process.env.REACT_APP_API_BASE || "http://localhost:3001";
+const API_BASE = process.env.REACT_APP_API_BASE || "/api";
+
 
 export default function MyItinerary() {
   const [schedule, setSchedule] = useState([]);
@@ -52,7 +53,7 @@ export default function MyItinerary() {
       return cached;
     }
     try {
-      const r = await fetch(`${API_BASE}/api/auth/me`, { credentials: "include" });
+      const r = await fetch(`${API_BASE}/auth/me`, { credentials: "include" });
       if (r.ok) {
         const d = await r.json();
         const id = toNum(d?.user?.id);
@@ -113,7 +114,7 @@ export default function MyItinerary() {
         setSchedule([
           {
             date: plan.startDate || "Day 1",
-            items: [{ time: "12:00", title: "", description: "", duration: "", locationName: "" }],
+            items: [{ time: "8:00", title: "", description: "", duration: "", locationName: "" }],
           },
         ]);
       } else {
@@ -183,7 +184,7 @@ export default function MyItinerary() {
         schedule: Array.isArray(schedule) ? schedule : [],
       };
 
-      const url = editingId ? `${API_BASE}/api/trip/${editingId}` : `${API_BASE}/api/trip`;
+      const url = editingId ? `${API_BASE}/trip/${editingId}` : `${API_BASE}/trip`;
       const method = editingId ? "PUT" : "POST";
 
       const res = await fetch(url, {
@@ -209,7 +210,7 @@ export default function MyItinerary() {
       <div className="my-itinerary-wrapper">
         {schedule.length === 0 ? (
           <div style={{ textAlign: "center", marginTop: "3rem" }}>
-            <p style={{ fontSize: "1.2rem" }}>🚫 No itinerary found.</p>
+            <p style={{ fontSize: "1.2rem" }}>No itinerary found.</p>
           </div>
         ) : (
           schedule.map((day, i) => (

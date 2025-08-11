@@ -6,24 +6,30 @@ import "./Member.css";
 
 const defaultAvatar = "https://cdn-icons-png.flaticon.com/512/149/149071.png";
 
+// ✅ CRA 读取：REACT_APP_API_BASE（没配就退回本地）
+const API_BASE = process.env.REACT_APP_API_BASE || "/api";
+
+
 export default function MemberPage() {
-  const { id } = useParams(); // 当前用户 ID
-  const [tripData, setTripData] = useState([]); // 用户所有行程
+  const { id } = useParams();
+  const [tripData, setTripData] = useState([]);
   const [selectedTripId, setSelectedTripId] = useState(null);
   const [memberData, setMemberData] = useState([]);
-  const [newMemberUserId, setNewMemberUserId] = useState(""); // 用于添加成员
+  const [newMemberUserId, setNewMemberUserId] = useState("");
 
   useEffect(() => {
     const fetchTrips = async () => {
       try {
-        const res = await fetch(`http://localhost:3001/api/trip/user/${id}`);
+        const res = await fetch(`${API_BASE}/trip/user/${id}`, {
+          credentials: "include",
+        });
         const trips = await res.json();
         if (Array.isArray(trips) && trips.length > 0) {
           setTripData(trips);
           setSelectedTripId(trips[0].id);
         }
       } catch (err) {
-        console.error("❌ 获取行程失败:", err);
+        console.error("❌ Failed to fetch trips:", err);
       }
     };
     fetchTrips();
@@ -33,11 +39,13 @@ export default function MemberPage() {
     if (!selectedTripId) return;
     const fetchMembers = async () => {
       try {
-        const res = await fetch(`http://localhost:3001/api/members?tripId=${selectedTripId}`);
+        const res = await fetch(`${API_BASE}/members?tripId=${selectedTripId}`, {
+          credentials: "include",
+        });
         const members = await res.json();
         setMemberData(members);
       } catch (err) {
-        console.error("❌ 获取成员失败:", err);
+        console.error("❌ Failed to fetch members:", err);
       }
     };
     fetchMembers();
@@ -47,51 +55,54 @@ export default function MemberPage() {
     const uid = parseInt(newMemberUserId);
     if (!uid || !selectedTripId) return;
     try {
-      const res = await fetch(`http://localhost:3001/api/members`, {
+      const res = await fetch(`${API_BASE}/members`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ userId: uid, tripId: selectedTripId, role: "Member" }),
       });
       const data = await res.json();
       if (!data || !data.id) {
-        alert("❌ 添加失败");
+        alert("❌ Failed to add member");
         return;
       }
       setMemberData((prev) => [...prev, data]);
       setNewMemberUserId("");
     } catch (err) {
-      console.error("❌ 添加成员失败:", err);
+      console.error("❌ Failed to add member:", err);
     }
   };
 
   const handleRoleChange = async (memberId, newRole) => {
     try {
-      await fetch(`http://localhost:3001/api/members/${memberId}`, {
+      await fetch(`${API_BASE}/members/${memberId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ role: newRole }),
       });
       setMemberData((prev) =>
         prev.map((m) => (m.id === memberId ? { ...m, role: newRole } : m))
       );
     } catch (err) {
-      console.error("❌ 更新角色失败:", err);
+      console.error("❌ Failed to update member role:", err);
     }
   };
 
   const handleDeleteMember = async (memberId) => {
-    if (!window.confirm("确定要删除该成员吗？")) return;
+    if (!window.confirm("Are you sure you want to delete this member?")) return;
     try {
-      const res = await fetch(`http://localhost:3001/api/members/${memberId}`, {
+      const res = await fetch(`${API_BASE}/members/${memberId}`, {
         method: "DELETE",
+        credentials: "include",
       });
       if (!res.ok) {
-        console.error("❌ 删除失败");
+        console.error("❌ Failed to delete member:", await res.text());
         return;
       }
       setMemberData((prev) => prev.filter((m) => m.id !== memberId));
     } catch (err) {
-      console.error("❌ 删除成员失败:", err);
+      console.error("❌ Failed to delete member:", err);
     }
   };
 
@@ -146,7 +157,7 @@ export default function MemberPage() {
                     className="delete-btn"
                     onClick={() => handleDeleteMember(member.id)}
                     style={{ background: "transparent", border: "none", cursor: "pointer" }}
-                    title="删除成员"
+                    title="Delete Member"
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"

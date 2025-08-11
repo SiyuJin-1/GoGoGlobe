@@ -1,0 +1,18 @@
+# node / build
+node_modules/
+dist/
+build/
+frontend/node_modules/
+frontend/build/
+backend/node_modules/
+backend/.cache/
+
+# env & secrets
+.env
+**/.env*
+secrets/
+*.pem
+
+# docker 运行中产生的数据
+caddy_data/
+caddy_config/

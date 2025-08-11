@@ -4,6 +4,7 @@ const dotenv = require("dotenv");
 const session = require("express-session");
 const passport = require("passport");
 const cookieParser = require("cookie-parser");
+const rateLimit = require('express-rate-limit');
 
 // ✅ NEW: 引入我们写好的 MQ 初始化函数
 const { initRabbit } = require("./utils/rabbitmq");
@@ -74,6 +75,68 @@ app.get('/api/auth/debug/get', (req, res) => {
   res.json({ sid: req.sessionID, user: req.session?.user || null });
 });
 
+/* 在业务路由注册附近，加这个“反向代理”路由 —— 注意在 app.listen 之前 */
+const geocodeLimiter = rateLimit({ windowMs: 1000, max: 1 }); // 1 req / sec
+
+app.get("/api/geocode/reverse", geocodeLimiter, async (req, res) => {
+  try {
+    const { lat, lon, lang = "en" } = req.query;
+    if (!lat || !lon) return res.status(400).json({ error: "lat/lon required" });
+
+    const url = new URL("https://nominatim.openstreetmap.org/reverse");
+    url.searchParams.set("format", "jsonv2");
+    url.searchParams.set("lat", lat);
+    url.searchParams.set("lon", lon);
+    url.searchParams.set("accept-language", lang);
+    url.searchParams.set("addressdetails", "1");
+    url.searchParams.set("namedetails", "1");
+    // 官方允许提供 email，建议加上
+    if (process.env.CONTACT_EMAIL) url.searchParams.set("email", process.env.CONTACT_EMAIL);
+
+    const r = await fetch(url.toString(), {
+      headers: {
+        // 按使用政策标识应用和联系人
+        "User-Agent": `gogoglobe/1.0 (${process.env.CONTACT_EMAIL || "contact@example.com"})`
+      }
+    });
+
+    if (!r.ok) {
+      const text = await r.text();
+      return res.status(r.status).json({ error: text || r.statusText });
+    }
+
+    const data = await r.json();
+    res.json(data);
+  } catch (e) {
+    console.error("reverse geocode proxy error:", e);
+    res.status(500).json({ error: "proxy failed" });
+  }
+});
+
+// 正向地理（新增）
+app.get('/api/geocode/search', geocodeLimiter, async (req, res) => {
+  try {
+    const { q, limit = 5, lang = 'en', country } = req.query;
+    if (!q) return res.status(400).json({ error: 'q required' });
+
+    const url = new URL('https://nominatim.openstreetmap.org/search');
+    url.searchParams.set('format', 'jsonv2');
+    url.searchParams.set('q', q);
+    url.searchParams.set('limit', String(limit));
+    url.searchParams.set('accept-language', lang);
+    if (country) url.searchParams.set('countrycodes', country);
+    if (process.env.CONTACT_EMAIL) url.searchParams.set('email', process.env.CONTACT_EMAIL);
+
+    const r = await fetch(url.toString(), {
+      headers: { 'User-Agent': `gogoglobe/1.0 (${process.env.CONTACT_EMAIL || 'contact@example.com'})` }
+    });
+    if (!r.ok) return res.status(r.status).json({ error: await r.text() || r.statusText });
+    res.json(await r.json());
+  } catch (e) {
+    console.error('search geocode proxy error:', e);
+    res.status(500).json({ error: 'proxy failed' });
+  }
+});
 const PORT = process.env.PORT || 3001;
 
 // ✅ NEW: 启动时先连 RabbitMQ（失败会打日志，成功会打印 [RMQ] connected）

@@ -1,3 +1,4 @@
+// src/pages/PackingList.js
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import Navbar from "./Navbar";
@@ -5,300 +6,324 @@ import SubNavBar from "./SubNavBar";
 import "./PackingList.css";
 
 export default function PackingList() {
-  const { id } = useParams(); // 从 URL 拿用户 ID
+  const { id } = useParams(); // 用户 ID
   const [packingData, setPackingData] = useState([]);
   const [selectedTripId, setSelectedTripId] = useState(null);
-  const [newItems, setNewItems] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [newItems, setNewItems] = useState({});
   const [members, setMembers] = useState([]);
 
-  // 获取 packingData（根据用户 ID）
-useEffect(() => {
-  const fetchPackingData = async () => {
-    try {
-      const res = await fetch(`http://localhost:3001/api/trip/user/${id}`);
-      let data = await res.json();
+  // 统一 API 根；去除末尾多余的 /
+  const API_BASE = process.env.REACT_APP_API_BASE || "/api";
 
-      console.log("📦 获取 packing data:", data);
+  /* ========== 获取行程数据（包含 items） ========== */
+  useEffect(() => {
+    if (!id) return;
+    (async () => {
+      try {
+        const res = await fetch(`${API_BASE}/trip/user/${id}`, {
+          credentials: "include",
+        });
+        let data = await res.json();
 
-      // 🛡️ 确保 data 是数组
-      if (!Array.isArray(data)) {
-        console.warn("⚠️ 返回值不是数组:", data);
-        data = [data];
+        if (!Array.isArray(data)) data = [data];
+
+        const converted = data.map((trip) => {
+          const start = new Date(trip.startDate);
+          const end = new Date(trip.endDate);
+          const days = Math.round((end - start) / (1000 * 60 * 60 * 24)) + 1;
+
+          const items = (trip.items ?? []).map((item) => ({
+            id: item.id,
+            name: item.name,
+            packed: !!item.packed,
+            // 和下拉值统一
+            assignedTo: item.assignedTo ?? "unassigned",
+          }));
+
+          return {
+            ...trip,
+            title: `${trip.fromCity} ➝ ${trip.destination}`,
+            date: `${start.getMonth() + 1}/${start.getDate()}/${start.getFullYear()} ~ ${
+              end.getMonth() + 1
+            }/${end.getDate()}/${end.getFullYear()}`,
+            days,
+            items,
+          };
+        });
+
+        setPackingData(converted);
+        if (converted.length > 0) setSelectedTripId(converted[0].id);
+      } catch (e) {
+        console.error("❌ Failed to fetch trip:", e);
       }
+    })();
+  }, [id]);
 
-      const converted = data.map((trip) => {
-        const start = new Date(trip.startDate);
-        const end = new Date(trip.endDate);
-        const days =
-          Math.round((end - start) / (1000 * 60 * 60 * 24)) + 1;
-
-        // ✅ 只使用 trip.items
-        const items = (trip.items ?? []).map((item) => ({
-          id: item.id,
-          name: item.name,
-          packed: item.packed ?? false,
-          assignedTo: item.assignedTo ?? "未分配",
-        }));
-
-        return {
-          ...trip,
-          title: `${trip.fromCity} ➝ ${trip.destination}`,
-          date: `${start.getMonth() + 1}/${start.getDate()}/${start.getFullYear()} ~ ${
-            end.getMonth() + 1
-          }/${end.getDate()}/${end.getFullYear()}`,
-          days,
-          items,
-        };
-      });
-
-      console.log("✅ 转换后的 packingData:", converted);
-      setPackingData(converted);
-
-      if (converted.length > 0) {
-        setSelectedTripId(converted[0].id);
-      }
-
-    } catch (err) {
-      console.error("❌ 获取 trip 失败:", err);
-    }
-  };
-
-  fetchPackingData();
-}, [id]);
-
-
-
-useEffect(() => {
-  const fetchMembers = async () => {
+  /* ========== 获取成员数据（用于分配） ========== */
+  useEffect(() => {
     if (!selectedTripId) return;
-    try {
-      const res = await fetch(`http://localhost:3001/api/members?tripId=${selectedTripId}`);
-      const data = await res.json();
-      console.log("👥 成员数据:", data);
-      setMembers(data);
-    } catch (err) {
-      console.error("❌ 获取成员失败", err);
-    }
-  };
+    (async () => {
+      try {
+        const res = await fetch(`${API_BASE}/members?tripId=${selectedTripId}`, {
+          credentials: "include",
+        });
+        const data = await res.json();
+        setMembers(Array.isArray(data) ? data : []);
+      } catch (e) {
+        console.error("❌ Failed to fetch members:", e);
+      }
+    })();
+  }, [selectedTripId]);
 
-  fetchMembers();
-}, [selectedTripId]);
-
-
-  // 自动保存到 localStorage（可选）
+  /* ========== 可选：把数据缓存到 localStorage ========== */
   useEffect(() => {
     if (packingData.length > 0) {
       localStorage.setItem("packingData", JSON.stringify(packingData));
     }
   }, [packingData]);
-console.log("📦 packingData:", packingData);
 
-  // 修改 packed 状态
-  // 修改 packed 状态，并同步后端
-const togglePacked = async (tripId, index) => {
-  const updated = packingData.map((trip) => {
-    if (trip.id === tripId) {
-      const items = [...trip.items];
-      const item = items[index];
-      item.packed = !item.packed;
+  const selectedTrip = packingData.find((t) => t.id === selectedTripId);
 
-      // 发请求更新后端
-      fetch(`http://localhost:3001/api/trip/item/${item.id}`, {
+  /* ========== 工具：按 tripId / itemId 更新本地状态 ========== */
+  const updateItemLocal = (tripId, itemId, patch) => {
+    setPackingData((prev) =>
+      prev.map((t) =>
+        t.id !== tripId
+          ? t
+          : {
+              ...t,
+              items: t.items.map((it) => (it.id === itemId ? { ...it, ...patch } : it)),
+            }
+      )
+    );
+  };
+
+  const addItemLocal = (tripId, item) => {
+    setPackingData((prev) =>
+      prev.map((t) => (t.id === tripId ? { ...t, items: [...t.items, item] } : t))
+    );
+  };
+
+  const removeItemLocal = (tripId, itemId) => {
+    setPackingData((prev) =>
+      prev.map((t) =>
+        t.id === tripId ? { ...t, items: t.items.filter((it) => it.id !== itemId) } : t
+      )
+    );
+  };
+
+  /* ========== 勾选 packed（乐观） ========== */
+  const togglePacked = async (tripId, itemId) => {
+    const trip = packingData.find((t) => t.id === tripId);
+    const item = trip?.items.find((i) => i.id === itemId);
+    if (!item) return;
+
+    const nextPacked = !item.packed;
+    updateItemLocal(tripId, itemId, { packed: nextPacked });
+
+    try {
+      await fetch(`${API_BASE}/trip/item/${itemId}`, {
         method: "PUT",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ packed: item.packed, assignedTo: item.assignedTo }),
+        body: JSON.stringify({ packed: nextPacked, assignedTo: item.assignedTo }),
       });
-
-      return { ...trip, items };
+    } catch (e) {
+      // 回滚
+      updateItemLocal(tripId, itemId, { packed: item.packed });
+      console.error("❌ Failed to toggle packed:", e);
     }
-    return trip;
-  });
-  setPackingData(updated);
-};
+  };
 
-// 修改归属人，并同步后端
-const updateAssignedTo = async (tripId, index, name) => {
-  const updated = packingData.map((trip) => {
-    if (trip.id === tripId) {
-      const items = [...trip.items];
-      const item = items[index];
-      item.assignedTo = name;
+  /* ========== 修改归属（乐观） ========== */
+  const updateAssignedTo = async (tripId, itemId, name) => {
+    const trip = packingData.find((t) => t.id === tripId);
+    const item = trip?.items.find((i) => i.id === itemId);
+    if (!item) return;
 
-      // 发请求更新后端
-      fetch(`http://localhost:3001/api/trip/item/${item.id}`, {
+    const nextAssigned = name || "unassigned";
+    updateItemLocal(tripId, itemId, { assignedTo: nextAssigned });
+
+    try {
+      await fetch(`${API_BASE}/trip/item/${itemId}`, {
         method: "PUT",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ packed: item.packed, assignedTo: item.assignedTo }),
+        body: JSON.stringify({ packed: item.packed, assignedTo: nextAssigned }),
       });
-
-      return { ...trip, items };
+    } catch (e) {
+      // 回滚
+      updateItemLocal(tripId, itemId, { assignedTo: item.assignedTo });
+      console.error("❌ Failed to update assignedTo:", e);
     }
-    return trip;
-  });
-  setPackingData(updated);
-};
+  };
 
+  /* ========== 新增 item（乐观） ========== */
+  const handleAddItem = async (tripId) => {
+    const content = (newItems[tripId] || "").trim();
+    if (!content) return;
 
-  // 添加新 item
-const handleAddItem = async (tripId) => {
-  const content = newItems[tripId];
-  if (!content?.trim()) return;
+    // 清空输入框
+    setNewItems((s) => ({ ...s, [tripId]: "" }));
 
-  const newItem = { name: content, packed: false, assignedTo: "未分配" };
-  setNewItems({ ...newItems, [tripId]: "" });
+    // 临时条目（先展示）
+    const temp = {
+      id: `tmp-${Date.now()}`,
+      name: content,
+      packed: false,
+      assignedTo: "unassigned",
+      _tmp: true,
+    };
+    addItemLocal(tripId, temp);
 
-  try {
-    const res = await fetch(`http://localhost:3001/api/trip/${tripId}/add-item`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(newItem),
-    });
+    try {
+      const res = await fetch(`${API_BASE}/trip/${tripId}/add-item`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: content, packed: false, assignedTo: "unassigned" }),
+      });
+      const data = await res.json();
 
-    const data = await res.json();
+      if (!data?.item?.id) throw new Error("invalid response");
 
-    if (!data.item || !data.item.id) {
-      console.error("❌ 后端未返回完整 item", data);
-      return;
+      // 用服务端返回替换临时条目
+      removeItemLocal(tripId, temp.id);
+      addItemLocal(tripId, data.item);
+    } catch (e) {
+      // 失败则移除临时条目
+      removeItemLocal(tripId, temp.id);
+      console.error("❌ Failed to add item:", e);
+      alert("Failed to add item, please try again later");
     }
+  };
 
-    // ✅ 用后端返回的 item（含 id）更新 state
-    const updated = packingData.map((trip) => {
-      if (trip.id === tripId) {
-        const items = [...trip.items, data.item];
-        return { ...trip, items };
-      }
-      return trip;
-    });
-    setPackingData(updated);
-  } catch (err) {
-    console.error("❌ 添加物品失败:", err);
-  }
-};
+  /* ========== 清空全部 ========== */
+  const clearAll = async () => {
+    if (!selectedTrip) return;
+    if (!window.confirm("Are you sure you want to clear all items?")) return;
 
-   const selectedTrip = packingData.find((trip) => trip.id === selectedTripId);
+    const prev = selectedTrip.items;
+    // 乐观清空
+    setPackingData((s) =>
+      s.map((t) => (t.id === selectedTrip.id ? { ...t, items: [] } : t))
+    );
 
-//   if (loading) return <p style={{ padding: "2rem" }}>⏳ Loading packing list...</p>;
+    try {
+      const res = await fetch(`${API_BASE}/trip/${selectedTrip.id}/clear-items`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+      if (!res.ok) throw new Error("clear failed");
+      alert("All items cleared successfully!");
+    } catch (e) {
+      // 回滚
+      setPackingData((s) =>
+        s.map((t) => (t.id === selectedTrip.id ? { ...t, items: prev } : t))
+      );
+      console.error("❌ Failed to clear items:", e);
+      alert("Failed to clear");
+    }
+  };
 
   return (
-  <>
-    <Navbar />
-    <SubNavBar />
-    <div className="packing-page">
-      <div className="trip-select">
-        <label htmlFor="tripSelect" style={{ fontWeight: 'bold' }}>Choose Trip：</label>
-        <select
-          id="tripSelect"
-          value={selectedTripId ?? ""}
-          onChange={(e) => setSelectedTripId(Number(e.target.value))}
-        >
-          <option value="">Choose Trip</option>
-          {packingData.map((trip) => (
-            <option key={trip.id} value={trip.id}>
-              {trip.title}
-            </option>
-          ))}
-        </select>
-      </div>
+    <>
+      <Navbar />
+      <SubNavBar />
 
-      {selectedTrip && (
-        <div className="packing-card">
-          <div
-            className="packing-header"
-            style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}
+      <div className="packing-page">
+        <div className="trip-select">
+          <label htmlFor="tripSelect" style={{ fontWeight: "bold" }}>
+            Choose Trip：
+          </label>
+          <select
+            id="tripSelect"
+            value={selectedTripId ?? ""}
+            onChange={(e) => setSelectedTripId(Number(e.target.value))}
           >
-            <div>
-              <h3>{selectedTrip.title}</h3>
-              <span className="packing-date">
-                {selectedTrip.date} ・{selectedTrip.days}天
-              </span>
+            <option value="">Choose Trip</option>
+            {packingData.map((trip) => (
+              <option key={trip.id} value={trip.id}>
+                {trip.title}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {selectedTrip && (
+          <div className="packing-card">
+            <div
+              className="packing-header"
+              style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}
+            >
+              <div>
+                <h3>{selectedTrip.title}</h3>
+                <span className="packing-date">
+                  {selectedTrip.date} ・{selectedTrip.days}天
+                </span>
+              </div>
+
+              <button
+                onClick={clearAll}
+                style={{
+                  background: "#f44336",
+                  color: "white",
+                  border: "none",
+                  padding: "8px 12px",
+                  borderRadius: "6px",
+                  cursor: "pointer",
+                }}
+              >
+                Clear All Items
+              </button>
             </div>
 
-            <button
-              onClick={async () => {
-                const confirm = window.confirm("Are you sure you want to clear all items?");
-                if (!confirm) return;
-
-                try {
-                  await fetch(`http://localhost:3001/api/trip/${selectedTrip.id}/clear-items`, {
-                    method: "DELETE",
-                  });
-                  alert("All items cleared successfully!");
-
-                  setPackingData((prev) =>
-                    prev.map((trip) =>
-                      trip.id === selectedTrip.id ? { ...trip, items: [] } : trip
-                    )
-                  );
-                } catch (err) {
-                  console.error("Failed to clear", err);
-                  alert("Failed to clear");
-                }
-              }}
-              style={{
-                background: "#f44336",
-                color: "white",
-                border: "none",
-                padding: "8px 12px",
-                borderRadius: "6px",
-                cursor: "pointer",
-              }}
-            >
-              Clear All Items
-            </button>
-          </div>
-
-          <ul className="packing-items">
-            {selectedTrip.items.map((item, idx) => {
-              console.log("assignedTo:", item.assignedTo);
-              console.log("Optional Members:", members.map(m => m.username));
-              console.log("Members Data：", members);
-
-              return (
-                <li key={idx} className="packing-item">
+            <ul className="packing-items">
+              {selectedTrip.items.map((item) => (
+                <li key={item.id} className="packing-item">
                   <input
                     type="checkbox"
                     checked={item.packed}
-                    onChange={() => togglePacked(selectedTrip.id, idx)}
+                    onChange={() => togglePacked(selectedTrip.id, item.id)}
                   />
                   <span style={{ textDecoration: item.packed ? "line-through" : "none" }}>
                     {item.name}
                   </span>
+
                   <span className="assigned-label">@{item.assignedTo}</span>
+
                   <select
                     className="assigned-select"
                     value={item.assignedTo}
                     onChange={(e) =>
-                      updateAssignedTo(selectedTrip.id, idx, e.target.value)
+                      updateAssignedTo(selectedTrip.id, item.id, e.target.value)
                     }
                   >
                     <option value="unassigned">unassigned</option>
-                    {members.map((member) => (
-                      <option key={member.id} value={member.user.email}>
-                        {member.user.email}
+                    {members.map((m) => (
+                      <option key={m.id} value={m.user.email}>
+                        {m.user.email}
                       </option>
                     ))}
                   </select>
                 </li>
-              );
-            })}
-          </ul>
+              ))}
+            </ul>
 
-          <div className="add-item-section">
-            <input
-              type="text"
-              placeholder="Add New Item..."
-              value={newItems[selectedTrip.id] || ""}
-              onChange={(e) =>
-                setNewItems({ ...newItems, [selectedTrip.id]: e.target.value })
-              }
-            />
-            <button onClick={() => handleAddItem(selectedTrip.id)}>Add</button>
+            <div className="add-item-section">
+              <input
+                type="text"
+                placeholder="Add New Item..."
+                value={newItems[selectedTrip.id] || ""}
+                onChange={(e) =>
+                  setNewItems((s) => ({ ...s, [selectedTrip.id]: e.target.value }))
+                }
+              />
+              <button onClick={() => handleAddItem(selectedTrip.id)}>Add</button>
+            </div>
           </div>
-        </div>
-      )}
-    </div>
-  </>
-);
-
+        )}
+      </div>
+    </>
+  );
 }

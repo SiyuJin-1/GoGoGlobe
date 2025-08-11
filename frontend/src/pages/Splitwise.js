@@ -5,7 +5,8 @@ import Navbar from "./Navbar";
 import SubNavBar from "./SubNavBar";
 import "./Splitwise.css";
 
-const API_BASE = process.env.REACT_APP_API_BASE || "http://localhost:3001";
+const API_BASE = process.env.REACT_APP_API_BASE || "/api";
+
 
 export default function SplitwisePage() {
   const { id: idFromRoute } = useParams();
@@ -40,7 +41,7 @@ export default function SplitwisePage() {
       let id = idFromRoute || localStorage.getItem("userId");
       if (!id) {
         try {
-          const me = await getJSON("/api/auth/me");
+          const me = await getJSON("/auth/me");
           if (me?.user?.id) {
             id = String(me.user.id);
             localStorage.setItem("userId", id);
@@ -56,7 +57,7 @@ export default function SplitwisePage() {
     if (uid == null) return;
     (async () => {
       try {
-        const trips = await getJSON(`/api/trip/user/${uid}`);
+        const trips = await getJSON(`/trip/user/${uid}`);
         if (Array.isArray(trips) && trips.length > 0) {
           setTripData(trips);
           setSelectedTripId(trips[0].id);
@@ -77,7 +78,7 @@ export default function SplitwisePage() {
 
     (async () => {
       try {
-        const members = await getJSON(`/api/members?tripId=${selectedTripId}`);
+        const members = await getJSON(`/members?tripId=${selectedTripId}`);
         setMemberData(Array.isArray(members) ? members : []);
       } catch (err) {
         console.error("❌ Failed to fetch members:", err);
@@ -85,7 +86,7 @@ export default function SplitwisePage() {
       }
 
       try {
-        const data = await getJSON(`/api/expenses?tripId=${selectedTripId}`);
+        const data = await getJSON(`/expenses?tripId=${selectedTripId}`);
         const list = Array.isArray(data) ? data : [];
         setExpenses(list);
         calculateTotals(list);
@@ -183,7 +184,7 @@ export default function SplitwisePage() {
     }
     try {
       setSaving(true);
-      const res = await fetch(`${API_BASE}/api/expenses/save`, {
+      const res = await fetch(`${API_BASE}/expenses/save`, {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
@@ -237,7 +238,7 @@ export default function SplitwisePage() {
       <div className="splitwise-grid">
         {/* Left: summary */}
         <div className="splitwise-card left">
-          <h4>Total Spent per Person</h4>
+          <h4 style={{ fontWeight: "bold", textAlign: "center" }}>Total Spent per Person</h4>
           {memberData.map((m) => (
             <div className="user-finance-entry" key={m.user.id}>
               <span>{m.user.email}</span>
@@ -265,7 +266,7 @@ export default function SplitwisePage() {
 
           <div className="avg-spending-separator"></div>
 
-          <h4 style={{ marginTop: "2rem" }}>Who Pays Whom</h4>
+          <h4 style={{ marginTop: "2rem", fontWeight: "bold", textAlign: "center" }}>Who Pays Whom</h4>
           {memberData.map((member) => {
             const from = member.user.email;
             const userPayments = balances.filter((b) => b.from === from);
@@ -290,7 +291,7 @@ export default function SplitwisePage() {
 
           <div className="avg-spending-separator"></div>
 
-          <h4 style={{ marginTop: "2rem" }}>Your Summary</h4>
+          <h4 style={{ marginTop: "2rem", fontWeight: "bold", textAlign: "center" }}>Your Summary</h4>
           <div className="user-finance-entry">
             <span style={{ marginTop: "1.2rem", fontWeight: "bold" }}>Your total spending</span>
             <span className="amount-positive" style={{ marginTop: "1.2rem", fontWeight: "bold" }}>
@@ -336,7 +337,7 @@ export default function SplitwisePage() {
 
         {/* Right: editor */}
         <div className="splitwise-card right">
-          <h3>Expenses</h3>
+          <h3 style={{ marginTop: "2rem", marginBottom: "2rem", fontSize: "2rem", fontWeight: "bold", textAlign: "center" }}>Expenses</h3>
 
           {expenses.map((item, index) => (
             <div className="budget-item budget-row" key={index}>

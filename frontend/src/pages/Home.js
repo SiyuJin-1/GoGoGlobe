@@ -5,44 +5,50 @@ import './Home.css';
 import Navbar from './Navbar';
 import Features from './Features';
 
-const API_BASE = process.env.REACT_APP_API_BASE || 'http://localhost:3001';
+const API_BASE = process.env.REACT_APP_API_BASE || "/api";
 
 function Home() {
   const navigate = useNavigate();
   const [checking, setChecking] = useState(true);
+  const [loggedIn, setLoggedIn] = useState(false);
 
-  // 进入页面时确保拿到 userId
+  // 1) 先看 URL 里是否带回了 ?userId=...
+  useEffect(() => {
+    const p = new URLSearchParams(window.location.search);
+    const uid = p.get('userId');
+    if (uid) {
+      localStorage.setItem('userId', String(uid));
+      setLoggedIn(true);
+      // 清掉查询串，避免刷新后重复解析
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  }, []);
+
+  // 2) 若本地没有 userId，再尝试通过会话接口获取
   useEffect(() => {
     const ensureUserId = async () => {
-      // 1) 先看 URL 是否带了 userId（Google 回调时会带）
-      const params = new URLSearchParams(window.location.search);
-      const uid = params.get('userId');
-      if (uid) {
-        localStorage.setItem('userId', uid);
-        console.log('✅ 从 URL 获取到 userId:', uid);
-        // 清除查询参数，避免刷新重复解析
-        window.history.replaceState({}, '', window.location.pathname);
+      let id = localStorage.getItem('userId');
+      if (id) {
+        setLoggedIn(true);
         setChecking(false);
         return;
       }
-
-      // 2) 如果 URL 没有，就调用后端 /api/auth/me 获取 session 中的用户
       try {
-        const r = await fetch(`${API_BASE}/api/auth/me`, { credentials: 'include' });
+        const r = await fetch(`${API_BASE}/auth/me`, { credentials: 'include' });
         const d = await r.json();
         if (d?.user?.id) {
           localStorage.setItem('userId', String(d.user.id));
-          console.log('✅ 从 /api/auth/me 获取到 userId:', d.user.id);
+          setLoggedIn(true);
+          console.log('✅ get userId from /auth/me ：', d.user.id);
         } else {
-          console.warn('⚠️ 未登录（/api/auth/me 返回空）');
+          console.warn('⚠️ do not get userId from /auth/me');
         }
       } catch (e) {
-        console.warn('⚠️ 获取登录态失败：', e);
+        console.warn('⚠️ Failed to get login status：', e);
       } finally {
         setChecking(false);
       }
     };
-
     ensureUserId();
   }, []);
 
@@ -54,9 +60,7 @@ function Home() {
           <div className="left-panel">
             <div className="text-wrapper">
               <h1>Tired of chaotic travel planning?</h1>
-              <h2>
-                <span className="highlight">Plan together.</span> Remember forever.
-              </h2>
+              <h2><span className="highlight">Plan together.</span> Remember forever.</h2>
 
               <div className="button-row">
                 <button

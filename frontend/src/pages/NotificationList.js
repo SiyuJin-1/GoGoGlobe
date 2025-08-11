@@ -4,6 +4,9 @@ import { useParams } from "react-router-dom";
 export default function NotificationList() {
   const { id } = useParams(); // 当前用户 ID
   const [notifications, setNotifications] = useState([]);
+  const API_BASE = process.env.REACT_APP_API_BASE || "/api";
+
+
 
   useEffect(() => {
     const fetchNotifications = async () => {
@@ -14,7 +17,7 @@ export default function NotificationList() {
       // 2) 都没有就去会话接口拿一次
       if (!userId) {
         try {
-          const meRes = await fetch("http://localhost:3001/api/auth/me", {
+          const meRes = await fetch(`${API_BASE}/auth/me`, {
             credentials: "include",
           });
           const ct = meRes.headers.get("content-type") || "";
@@ -32,7 +35,7 @@ export default function NotificationList() {
 
       try {
         const res = await fetch(
-          `http://localhost:3001/api/notification/user/${userId}`,
+          `${API_BASE}/notification/user/${userId}`,
           { credentials: "include" }
         );
         const ct = res.headers.get("content-type") || "";
@@ -55,7 +58,7 @@ export default function NotificationList() {
   const markAsRead = async (notificationId) => {
     try {
       await fetch(
-        `http://localhost:3001/api/notification/${notificationId}/read`,
+        `${API_BASE}/notification/${notificationId}/read`,
         {
           method: "PATCH",
           credentials: "include",

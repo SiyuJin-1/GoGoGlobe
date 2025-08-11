@@ -3,7 +3,8 @@ import React, { useState } from 'react';
 import './Login.css';
 import { useNavigate, Link } from 'react-router-dom';
 
-const API_BASE = process.env.REACT_APP_API_BASE || 'http://localhost:3001';
+const API_BASE = process.env.REACT_APP_API_BASE || "/api";
+
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -17,8 +18,8 @@ export default function Login() {
     setMessage('');
     setLoading(true);
     try {
-      // 账号密码登录 —— 明确打到 3001
-      const resp = await fetch(`${API_BASE}/api/auth/login`, {
+      // 账号密码登录
+      const resp = await fetch(`${API_BASE}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -27,27 +28,27 @@ export default function Login() {
 
       const data = await resp.json().catch(() => ({}));
       if (!resp.ok) {
-        setMessage(`❌ 登录失败：${data?.error || 'unknown error'}`);
+        setMessage(`❌ Failed to login：${data?.error || 'unknown error'}`);
         return;
       }
 
       // 再确认一次登录态并拿到 id
-      const me = await fetch(`${API_BASE}/api/auth/me`, { credentials: 'include' })
+      const me = await fetch(`${API_BASE}/auth/me`, { credentials: 'include' })
         .then(r => (r.ok ? r.json() : { user: null }))
         .catch(() => ({ user: null }));
 
       const id = me?.user?.id ?? data?.userId;
       if (id) {
         localStorage.setItem('userId', String(id));
-        setMessage('✅ 登录成功！');
+        setMessage('✅ Successfully logged in！');
         navigate('/');
       } else {
         localStorage.removeItem('userId');
-        setMessage('⚠️ 已登录但未获取到用户信息，请稍后再试');
+        setMessage('⚠️ Login successful, but no user ID found. Please try again.');
       }
     } catch (err) {
       console.error(err);
-      setMessage('❌ 网络异常，请稍后重试');
+      setMessage('❌ Failed to login： Network error. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -55,7 +56,7 @@ export default function Login() {
 
   // Google 登录入口 —— 一定跳到 3001
   const handleGoogleSignIn = () => {
-    window.location.assign(`${API_BASE}/api/auth/google`);
+    window.location.assign(`${API_BASE}/auth/google`);
   };
 
   return (

@@ -4,9 +4,9 @@ import SubNavBar from "./SubNavBar";
 import "./TripPhoto.css";
 import UploadPhotoForm from "./UploadPhotoForm";
 
-const API_BASE =
-  (typeof import.meta !== "undefined" && import.meta.env?.VITE_API_BASE) ||
-  "http://localhost:3001";
+const API_BASE = process.env.REACT_APP_API_BASE || "/api";
+
+
 
 export default function TripPhotoPage() {
   // ---------- state ----------
@@ -56,7 +56,7 @@ export default function TripPhotoPage() {
     if (p.visibility === "public" && p.imageUrl) return p.imageUrl;
     if (!p.imageKey) return "";
     const r = await fetch(
-      `${API_BASE}/api/upload/view-url?key=${encodeURIComponent(
+      `${API_BASE}/upload/view-url?key=${encodeURIComponent(
         p.imageKey
       )}&expiresIn=300`
     );
@@ -113,7 +113,7 @@ export default function TripPhotoPage() {
   const fetchTrips = async () => {
     if (userId == null) return;
     try {
-      const res = await fetch(`${API_BASE}/api/trip/user/${userId}`);
+      const res = await fetch(`${API_BASE}/trip/user/${userId}`);
       const data = await res.json();
       setTrips(Array.isArray(data) ? data : []);
     } catch (err) {
@@ -126,7 +126,7 @@ export default function TripPhotoPage() {
     if (!tripId || userId == null) return;
     try {
       const res = await fetch(
-        `${API_BASE}/api/photo/trip/${tripId}?userId=${userId}`
+        `${API_BASE}/photo/trip/${tripId}?userId=${userId}`
       );
       const data = await res.json();
       setPhotos(Array.isArray(data) ? data : []);
@@ -145,7 +145,7 @@ export default function TripPhotoPage() {
     if (!photoId || userId == null) return;
     try {
       const res = await fetch(
-        `${API_BASE}/api/photo/${photoId}/likes?userId=${userId}`
+        `${API_BASE}/photo/${photoId}/likes?userId=${userId}`
       );
       const data = await res.json();
       setLikes((prev) => ({ ...prev, [photoId]: data || {} }));
@@ -157,7 +157,7 @@ export default function TripPhotoPage() {
   const fetchComments = async (photoId) => {
     if (!photoId) return;
     try {
-      const res = await fetch(`${API_BASE}/api/photo/${photoId}/comments`);
+      const res = await fetch(`${API_BASE}/photo/${photoId}/comments`);
       const data = await res.json();
       setComments(Array.isArray(data) ? data : []);
     } catch (err) {
@@ -181,7 +181,7 @@ export default function TripPhotoPage() {
   const handleLike = async (photoId) => {
     if (!photoId || userId == null) return;
     try {
-      await fetch(`${API_BASE}/api/photo/${photoId}/like`, {
+      await fetch(`${API_BASE}/photo/${photoId}/like`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId }),
@@ -195,7 +195,7 @@ export default function TripPhotoPage() {
   const handleAddComment = async () => {
     if (!previewPhoto?.id || !newComment.trim() || userId == null) return;
     try {
-      await fetch(`${API_BASE}/api/photo/${previewPhoto.id}/comments`, {
+      await fetch(`${API_BASE}/photo/${previewPhoto.id}/comments`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId, content: newComment }),
@@ -234,7 +234,7 @@ export default function TripPhotoPage() {
 
     try {
       const res = await fetch(
-        `${API_BASE}/api/photo/${previewPhoto.id}?userId=${userId}`,
+        `${API_BASE}/photo/${previewPhoto.id}?userId=${userId}`,
         { method: "DELETE" }
       );
       if (!res.ok && res.status !== 204) {

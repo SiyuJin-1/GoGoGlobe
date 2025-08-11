@@ -1,9 +1,7 @@
 import React, { useRef, useState } from "react";
 import "./AccommodationForm.css";
 
-const API_BASE =
-  (typeof import.meta !== "undefined" && import.meta.env?.VITE_API_BASE) ||
-  "http://localhost:3001";
+const API_BASE = process.env.REACT_APP_API_BASE || "/api";
 
 export default function AccommodationForm({
   userId,
@@ -33,8 +31,8 @@ export default function AccommodationForm({
   const onPickFile = (e) => {
     const f = e.target.files?.[0];
     if (!f) return;
-    if (!ALLOW_TYPES.includes(f.type)) return alert("仅支持 JPG / PNG / WebP");
-    if (f.size > MAX_MB * 1024 * 1024) return alert(`文件不得超过 ${MAX_MB}MB`);
+    if (!ALLOW_TYPES.includes(f.type)) return alert("Only JPG / PNG / WebP formats are supported");
+    if (f.size > MAX_MB * 1024 * 1024) return alert(`File size must not exceed ${MAX_MB}MB`);
     setImageFile(f);
     setPreview(URL.createObjectURL(f));
   };
@@ -42,7 +40,7 @@ export default function AccommodationForm({
   // 直传 S3（住宿图 -> 公开桶）
   async function uploadToS3(file, { userId, tripId }) {
     // 1) 取预签名（注意 kind）
-    const r1 = await fetch(`${API_BASE}/api/upload/sign`, {
+    const r1 = await fetch(`${API_BASE}/upload/sign`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -55,7 +53,7 @@ export default function AccommodationForm({
     });
     if (!r1.ok) {
       const msg = await r1.text().catch(() => "");
-      throw new Error("获取签名失败：" + msg);
+      throw new Error("Failed to get signed URL：" + msg);
     }
     const { uploadUrl, publicUrl, key } = await r1.json();
 
@@ -67,7 +65,7 @@ export default function AccommodationForm({
     });
     if (!r2.ok) {
       const msg = await r2.text().catch(() => "");
-      throw new Error("上传到 S3 失败：" + msg);
+      throw new Error("Failed to upload to S3：" + msg);
     }
 
     return { publicUrl, key };
@@ -76,15 +74,15 @@ export default function AccommodationForm({
   async function handleSubmit(e) {
     e?.preventDefault?.();
 
-    if (!selectedTripId) return alert("请选择行程");
+    if (!selectedTripId) return alert("Please select a trip");
     if (!form.name || !form.checkIn || !form.checkOut) {
-      return alert("请填写完整信息（名称、入住、退房）");
+      return alert("Please fill in all fields (Name, Check-in, Check-out)");
     }
     // 简单日期校验：checkIn <= checkOut
     if (form.checkIn && form.checkOut) {
       const inD = new Date(form.checkIn);
       const outD = new Date(form.checkOut);
-      if (inD > outD) return alert("退房日期必须晚于或等于入住日期");
+      if (inD > outD) return alert("Check-out date must be later than or equal to check-in date");
     }
 
     try {
@@ -103,7 +101,7 @@ export default function AccommodationForm({
       }
 
       // ② 保存到数据库
-      const res = await fetch(`${API_BASE}/api/accommodations`, {
+      const res = await fetch(`${API_BASE}/accommodations`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -119,9 +117,9 @@ export default function AccommodationForm({
       });
 
       const data = await res.json().catch(() => ({}));
-      if (!res.ok || !data?.id) throw new Error(data?.message || "保存失败");
+      if (!res.ok || !data?.id) throw new Error(data?.message || "Failed to save");
 
-      alert("✅ 添加成功");
+      alert("✅ Successfully added");
       // 重置表单
       setForm({ name: "", address: "", checkIn: "", checkOut: "", bookingUrl: "" });
       setImageFile(null);
@@ -130,7 +128,7 @@ export default function AccommodationForm({
       onSuccess?.();
     } catch (err) {
       console.error(err);
-      alert("❌ 失败：" + (err.message || "未知错误"));
+      alert("❌ Failed：" + (err.message || "Unknown error"));
     } finally {
       setLoading(false);
     }
@@ -140,32 +138,17 @@ export default function AccommodationForm({
     <form className="form-card" onSubmit={handleSubmit}>
       <h3 className="accommodation-title">Add New Accommodation</h3>
 
-      {/* 如需在表单里切换行程，放开下方注释 */}
-      {/* {tripList?.length > 0 && setSelectedTripId && (
-        <select
-          value={selectedTripId ?? ""}
-          onChange={(e) => setSelectedTripId(Number(e.target.value))}
-          style={{ marginBottom: 8 }}
-        >
-          {tripList.map((t) => (
-            <option key={t.id} value={t.id}>
-              {t.fromCity} ➝ {t.destination}
-            </option>
-          ))}
-        </select>
-      )} */}
-
       <input
         name="name"
         value={form.name}
         onChange={onChange}
-        placeholder="🏨 Accommodation Name"
+        placeholder="Accommodation Name"
       />
       <input
         name="address"
         value={form.address}
         onChange={onChange}
-        placeholder="📍 Address"
+        placeholder="Address"
       />
       <input
         name="checkIn"
@@ -203,10 +186,10 @@ export default function AccommodationForm({
       </div>
 
       <button type="submit" disabled={loading}>
-        {loading ? "上传中..." : "Upload"}
+        {loading ? "Uploading..." : "Upload"}
       </button>
       <div style={{ fontSize: 12, color: "#6b7280", marginTop: 6 }}>
-        支持类型：JPG/PNG/WebP，最大 {MAX_MB}MB
+        Supported formats: JPG/PNG/WebP, max {MAX_MB}MB
       </div>
     </form>
   );

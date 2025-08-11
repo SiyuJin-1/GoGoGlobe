@@ -11,7 +11,8 @@ export default function Register() {
   const navigate = useNavigate();
 
   // 后端地址（没有代理时走这个）
-  const API_BASE = process.env.REACT_APP_API_BASE || 'http://localhost:3001';
+  const API_BASE = process.env.REACT_APP_API_BASE || "/api";
+
 
   const handleRegister = async (e) => {
     e.preventDefault();
@@ -20,7 +21,7 @@ export default function Register() {
 
     try {
       // 注册
-      const resp = await fetch(`${API_BASE}/api/auth/register`, {
+      const resp = await fetch(`${API_BASE}/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -35,7 +36,7 @@ export default function Register() {
       }
 
       // 确认会话，拿 userId
-      const me = await fetch(`${API_BASE}/api/auth/me`, {
+      const me = await fetch(`${API_BASE}/auth/me`, {
         credentials: 'include',
       })
         .then(r => (r.ok ? r.json() : { user: null }))
@@ -60,7 +61,7 @@ export default function Register() {
 
   const handleGoogleSignIn = () => {
     // 直接跳后端的 Google OAuth 起点
-    window.location.href = `${API_BASE}/api/auth/google`;
+    window.location.href = `${API_BASE}/auth/google`;
   };
 
   return (

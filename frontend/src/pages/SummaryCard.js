@@ -5,7 +5,8 @@ import "./SummaryCard.css";
 import Navbar from "./Navbar";
 import SubNavBar from "./SubNavBar";
 
-const API_BASE = process.env.REACT_APP_API_BASE || "http://localhost:3001";
+const API_BASE = process.env.REACT_APP_API_BASE || "/api";
+
 
 /* 单张卡片 */
 const SummaryCard = ({ plan, onClick, onDelete, onEdit }) => {
@@ -71,7 +72,7 @@ export default function TravelSummaries() {
 
     // 2) /api/auth/me
     try {
-      const r = await fetch(`${API_BASE}/api/auth/me`, { credentials: "include" });
+      const r = await fetch(`${API_BASE}/auth/me`, { credentials: "include" });
       if (r.ok) {
         const d = await r.json();
         if (d?.user?.id) {
@@ -92,7 +93,7 @@ export default function TravelSummaries() {
         return;
       }
 
-      const res = await fetch(`${API_BASE}/api/trip/user/${userId}`, { credentials: "include" });
+      const res = await fetch(`${API_BASE}/trip/user/${userId}`, { credentials: "include" });
 
       // 先检查是不是 JSON（防止前端服务器返回 HTML）
       const ct = res.headers.get("content-type") || "";
@@ -123,13 +124,13 @@ export default function TravelSummaries() {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm("确认要删除这个行程吗？")) return;
+    if (!window.confirm("Are you sure you want to delete this itinerary?")) return;
     try {
-      await fetch(`${API_BASE}/api/trip/${id}`, { method: "DELETE", credentials: "include" });
+      await fetch(`${API_BASE}/trip/${id}`, { method: "DELETE", credentials: "include" });
       await fetchPlans();
     } catch (e) {
-      console.error("❌ 删除失败:", e);
-      alert("删除失败，请稍后再试");
+      console.error("❌ Failed to delete:", e);
+      alert("Failed to delete, please try again later");
     }
   };
 
@@ -140,11 +141,11 @@ export default function TravelSummaries() {
       <Navbar />
       <SubNavBar />
       <div className="summary-wrapper">
-        <h2 className="summary-title">🌐 My Travel Summaries</h2>
+        <h2 className="summary-title">My Travel Summaries</h2>
         {loading ? (
-          <p style={{ padding: "1rem" }}>加载中...</p>
+          <p style={{ padding: "1rem" }}>Loading...</p>
         ) : !plans.length ? (
-          <p style={{ padding: "1rem" }}>目前没有保存的行程。</p>
+          <p style={{ padding: "1rem" }}>No saved itineraries at the moment.</p>
         ) : (
           plans.map((p) => (
             <SummaryCard

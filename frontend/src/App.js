@@ -18,10 +18,10 @@ import NotificationList from './pages/NotificationList';
 import TripPhoto from './pages/TripPhoto';
 import ManualPlan from './pages/MyItinerary';
 
-const API_BASE = process.env.REACT_APP_API_BASE || '';
+const API_BASE = process.env.REACT_APP_API_BASE || "/api";
 function App() {
   useEffect(() => {
-    fetch(`${API_BASE}/api/auth/me`, { credentials: 'include' })
+    fetch(`${API_BASE}/auth/me`, { credentials: 'include' })
       .then(r => r.ok ? r.json() : { user: null })
       .then(data => {
         const id = data?.user?.id;

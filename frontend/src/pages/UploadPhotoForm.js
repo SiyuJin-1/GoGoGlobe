@@ -5,7 +5,7 @@ const ALLOW_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const MAX_MB = 15;
 
 // 建议复用你的 API_BASE
-const API_BASE = import.meta.env?.VITE_API_BASE || "http://localhost:3001";
+const API_BASE = process.env.REACT_APP_API_BASE || "/api";
 
 export default function UploadPhotoForm({ tripId, dayIndex, onUpload }) {
   const [files, setFiles] = useState([]);
@@ -33,7 +33,7 @@ export default function UploadPhotoForm({ tripId, dayIndex, onUpload }) {
 
   // 👉 只传 kind:"photo"，让后端统一放到“照片私有桶”
   async function getSignedUrl(file, { userId, tripId }) {
-    const r = await fetch(`${API_BASE}/api/upload/sign`, {
+    const r = await fetch(`${API_BASE}/upload/sign`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -73,7 +73,7 @@ export default function UploadPhotoForm({ tripId, dayIndex, onUpload }) {
 
         // 3) 落库 —— 这里才区分 public/private
         //    因为都在私有桶里，所以 imageUrl 一律 null（展示时用 GET 预签名）
-        const metaRes = await fetch(`${API_BASE}/api/photo`, {
+        const metaRes = await fetch(`${API_BASE}/photo`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -137,7 +137,7 @@ export default function UploadPhotoForm({ tripId, dayIndex, onUpload }) {
 
       {!!files.length && (
         <div style={{ marginTop: 8, fontSize: 12, color: "#6b7280" }}>
-          已选 {files.length} 张；仅支持 JPG/PNG/WebP，单张 ≤ {MAX_MB}MB
+          Choose {files.length} photos; only support JPG/PNG/WebP, single ≤ {MAX_MB}MB
         </div>
       )}
     </div>

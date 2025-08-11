@@ -12,11 +12,12 @@ function AIPlan() {
   const [plan, setPlan] = useState('');
   const [preference, setPreference] = useState('');
   const [structuredSchedule, setStructuredSchedule] = useState([]);
+  const API_BASE = process.env.REACT_APP_API_BASE || "/api";
 
   const generatePlan = async () => {
   const days = calculateDays(planData.startDate, planData.endDate);
   try {
-    const response = await fetch('http://localhost:3001/api/plan', {
+    const response = await fetch(`${API_BASE}/plan`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -43,11 +44,11 @@ function AIPlan() {
       data = JSON.parse(jsonFixed);
     } catch (jsonErr) {
       console.error("❌ JSON parse error:", jsonErr);
-      alert("AI 返回的数据格式错误，可能被截断了。请重新点击生成行程！");
+      alert("AI response is not valid JSON. Please try again.");
       return;
     }
 
-    console.log("🐛 AI 修复后的数据：", data);
+    console.log("AI fixed data：", data);
 
     // 更新页面
     setPlan(data.markdown);
@@ -58,11 +59,11 @@ function AIPlan() {
       data.schedule.length < days ||
       data.schedule.some((day) => day.items.length < 3)
     ) {
-      alert("⚠️ AI 行程结构可能不完整，可点击 Generate Plan 再试一次！也可以直接应用该行程并手动添加内容。");
+      alert("⚠️ AI generated schedule is incomplete. Please try again.");
     }
   } catch (err) {
     console.error("❌ Error generating plan:", err);
-    alert("服务器连接失败或数据出错，请稍后再试。");
+    alert("Failed to connect to server or data error, please try again later.");
   }
 };
 
